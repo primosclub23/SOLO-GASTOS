@@ -270,6 +270,21 @@ input:focus,select:focus{border-color:rgba(99,242,195,.55)}
 @keyframes okring{to{opacity:1}}
 @keyframes okdraw{to{stroke-dashoffset:0}}
 @media (prefers-reduced-motion:reduce){.ok.show{opacity:1;clip-path:none;transform:none}.ok .ring{opacity:1}.ok .ring path{stroke-dashoffset:0}}
+.hact{display:flex;align-items:center;gap:14px}
+.mini{width:34px;height:34px;border-radius:50%;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center}
+.mini svg{width:17px;height:17px;stroke:var(--text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.stack.pre i{transform:scaleX(0)}
+.dnwrap{position:relative;width:min(250px,68vw);aspect-ratio:1;margin:6px auto 20px}
+.dn{width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
+.dn circle{fill:none;stroke:var(--c);stroke-width:22;stroke-dasharray:var(--len) var(--C);stroke-dashoffset:var(--off);cursor:pointer;
+  transition:stroke-dasharray 1.1s var(--ease) calc(.15s + var(--i)*85ms),stroke-width .35s var(--spring),opacity .3s}
+.dn circle.trk{stroke:rgba(255,255,255,.05);stroke-dasharray:none;stroke-dashoffset:0;pointer-events:none}
+.rise:not(.in) .dn circle:not(.trk),.dn.pre circle:not(.trk){stroke-dasharray:0 var(--C)}
+.dn.sel circle:not(.on):not(.trk){opacity:.25}
+.dn circle.on{stroke-width:28}
+.dnc{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none;gap:2px}
+.dnc b{font-size:25px;font-weight:700;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.dnc small{font-size:13px;color:var(--dim)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -533,6 +548,42 @@ const dueLabel = n => n === 0 ? 'Hoy' : n === 1 ? 'Mañana' : `En ${n} días`;
 const UIKEY = 'sologastos.ui';
 const getUI = (k, d) => { try { const v = (JSON.parse(localStorage.getItem(UIKEY)) || {})[k]; return v === undefined ? d : v; } catch { return d; } };
 const setUI = (k, v) => { try { const o = JSON.parse(localStorage.getItem(UIKEY)) || {}; o[k] = v; localStorage.setItem(UIKEY, JSON.stringify(o)); } catch {} };
+const ICON_PIE = '<path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 12a9 9 0 0 0-9-9v9z"/>';
+const ICON_BAR = '<rect x="3" y="9" width="18" height="6" rx="3"/><path d="M9 9v6M15 9v6"/>';
+const DN_R = 76, DN_C = 2 * Math.PI * DN_R;
+function catStats(){
+  return S.cats.map(c => { const items = S.expenses.filter(e => e.cat === c.id); return {c, items, sum:r2(items.reduce((a, e) => a + monthly(e), 0))}; })
+    .filter(x => x.items.length).sort((a, b) => b.sum - a.sum);
+}
+function chartHTML(list, t, donut){
+  if (!donut) return `<div class="stack">${list.map((x, i) => `<i style="--c:${x.c.color};--w:${Math.max(x.sum, 1)};--i:${i}"></i>`).join('')}</div>`;
+  let acc = 0;
+  const segs = list.map((x, i) => {
+    const f = t ? x.sum / t : 0, len = Math.max(f * DN_C - 3, 1), off = -acc * DN_C; acc += f;
+    return `<circle data-dn="${x.c.id}" cx="100" cy="100" r="${DN_R}" style="--c:${x.c.color};--len:${len.toFixed(2)};--off:${off.toFixed(2)};--i:${i}"/>`;
+  }).join('');
+  return `<div class="dnwrap"><svg class="dn" viewBox="0 0 200 200" style="--C:${DN_C.toFixed(2)}"><circle class="trk" cx="100" cy="100" r="${DN_R}" style="--c:transparent;--i:0"/>${segs}</svg>
+    <div class="dnc" id="dnc" data-t="${t}"><b>${money(t)} €</b><small>al mes</small></div></div>`;
+}
+function pickCat(id){
+  const dn = $('.dn'); if (!dn) return;
+  const cur = dn.dataset.sel === id ? '' : id; dn.dataset.sel = cur;
+  dn.classList.toggle('sel', !!cur);
+  dn.querySelectorAll('circle[data-dn]').forEach(c => c.classList.toggle('on', c.dataset.dn === cur));
+  const box = $('#dnc'), t = +box.dataset.t;
+  if (!cur) { box.innerHTML = `<b>${money(t)} €</b><small>al mes</small>`; return; }
+  const c = catOf(id), sum = r2(S.expenses.filter(e => e.cat === id).reduce((a, e) => a + monthly(e), 0));
+  box.innerHTML = `<small style="color:${c.color};font-weight:600">${esc(c.name)}</small><b>${money(sum)} €</b><small>${t ? Math.round(sum / t * 100) : 0} % del total</small>`;
+}
+function toggleChart(){
+  const on = !getUI('donut', false); setUI('donut', on);
+  const box = $('#chartbox'), list = catStats();
+  box.innerHTML = chartHTML(list, total(), on);
+  const el = box.querySelector('.dn, .stack'); el.classList.add('pre');
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('pre')));
+  const b = $('#btn-donut'); b.innerHTML = `<svg viewBox="0 0 24 24">${on ? ICON_BAR : ICON_PIE}</svg>`;
+  b.setAttribute('aria-label', on ? 'Ver como barra' : 'Ver como gráfico circular');
+}
 const prev = {}, prevCnt = {};
 let painted = false, io, cio;
 const cnt = (k, v) => `<span class="cnt" data-k="${k}" data-v="${v}">${money(v)}</span>`;
@@ -587,7 +638,7 @@ function render(){
     const items = S.expenses.filter(e => e.cat === c.id);
     return {c, items, sum:r2(items.reduce((a, e) => a + monthly(e), 0))};
   }).filter(x => x.items.length).sort((a, b) => b.sum - a.sum);
-  const nf = notifs(), nn = nf.asks.length + nf.soon.length, upOpen = getUI('up', true);
+  const nf = notifs(), nn = nf.asks.length + nf.soon.length, upOpen = getUI('up', true), donutOn = getUI('donut', false);
   const up = S.expenses.filter(e => e.next && daysUntil(e.next) <= 60).sort((a, b) => a.next.localeCompare(b.next)).slice(0, 5);
   let delta = '';
   if (h.length >= 2) {
@@ -640,9 +691,9 @@ function render(){
   </section>` : ''}
 
   <section class="sec rise" style="--d:4">
-    <div class="sechead"><h2>Por categorías</h2><button class="link" id="btn-cats">Gestionar</button></div>
+    <div class="sechead"><h2>Por categorías</h2><div class="hact"><button class="mini" id="btn-donut" aria-label="${donutOn ? 'Ver como barra' : 'Ver como gráfico circular'}"><svg viewBox="0 0 24 24">${donutOn ? ICON_BAR : ICON_PIE}</svg></button><button class="link" id="btn-cats">Gestionar</button></div></div>
     ${list.length ? `
-    <div class="stack">${list.map((x, i) => `<i style="--c:${x.c.color};--w:${Math.max(x.sum, 1)};--i:${i}"></i>`).join('')}</div>
+    <div id="chartbox">${chartHTML(list, t, donutOn)}</div>
     <div class="list">${list.map((x, i) => `
       <button class="row rise" data-cat="${x.c.id}" style="--c:${x.c.color};--d:${Math.min(i, 3)}">
         <span class="ico"><svg viewBox="0 0 24 24">${ICONS[x.c.icon]}</svg></span>
@@ -938,7 +989,7 @@ function openSettings(){
     <button class="ghost" id="s-imp">Importar copia</button>
     <input type="file" id="s-file" accept="application/json" hidden>
     <button class="danger" id="s-clear">Borrar todo y empezar de cero</button>
-    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 16</p>`,
+    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 17</p>`,
   () => {
     $('#s-cats').onclick = openCats;
     $('#s-notif').onclick = async e => {
@@ -1002,8 +1053,11 @@ function checkReminders(){
 
 /* ---------- eventos ---------- */
 document.addEventListener('click', e => {
-  const t = e.target.closest('#tog-up,#btn-bell,[data-pay],[data-del],[data-ecat],[data-newcat],[data-edit],[data-cat],[data-add],#btn-set,#btn-clear,#btn-cats'); if (!t) return;
-  if (t.id === 'tog-up') {
+  const t = e.target.closest('[data-dn],.dnwrap,#btn-donut,#tog-up,#btn-bell,[data-pay],[data-del],[data-ecat],[data-newcat],[data-edit],[data-cat],[data-add],#btn-set,#btn-clear,#btn-cats'); if (!t) return;
+  if (t.dataset.dn) pickCat(t.dataset.dn);
+  else if (t.classList.contains('dnwrap')) { const dn = $('.dn'); if (dn && dn.dataset.sel) pickCat(dn.dataset.sel); }
+  else if (t.id === 'btn-donut') toggleChart();
+  else if (t.id === 'tog-up') {
     const open = t.getAttribute('aria-expanded') !== 'true';
     t.setAttribute('aria-expanded', open); $('#fold-up').classList.toggle('open', open); setUI('up', open);
   }

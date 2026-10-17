@@ -72,6 +72,10 @@ Los iconos de categoría (y el de reserva cuando no hay favicon) son SVG **duoto
 
 «Próximos vencimientos» se pliega con una animación de altura (`.fold` con `grid-template-rows:0fr→1fr`). La elección se guarda en `localStorage` (`sologastos.ui`, clave `up`; por defecto abierta) y plegada muestra un resumen («5 · en 2 días»).
 
+## 3f. Gráfico de categorías: barra o donut
+
+En «Por categorías», el botón de gráfico (`#btn-donut`) alterna la barra apilada y un donut SVG (`chartHTML()`, `toggleChart()`); la elección se guarda en `sologastos.ui` (`donut`). Cada segmento es un `<circle>` con `stroke-dasharray`/`dashoffset` calculados con la circunferencia (`DN_C`) y se dibuja en cascada con una transición; tocar un segmento (`pickCat()`) lo resalta y muestra categoría, importe y % en el centro; tocar el hueco vuelve al total.
+
 ## 4. Avisos
 
 Notification API, comprobación **al abrir la app** (y al volver a primer plano). Un aviso por gasto y vencimiento (`sologastos.notified`).
