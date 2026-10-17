@@ -895,7 +895,7 @@ function openSettings(){
     <button class="ghost" id="s-imp">Importar copia</button>
     <input type="file" id="s-file" accept="application/json" hidden>
     <button class="danger" id="s-clear">Borrar todo y empezar de cero</button>
-    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 11</p>`,
+    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 12</p>`,
   () => {
     $('#s-cats').onclick = openCats;
     $('#s-notif').onclick = async e => {
@@ -906,9 +906,16 @@ function openSettings(){
       else toast('Permiso denegado en el navegador');
     };
     $('#s-exp').onclick = () => {
+      const name = `solo-gastos-${iso(new Date())}.json`, json = JSON.stringify(S, null, 2);
+      const file = new File([json], name, {type:'application/json'});
+      // En el móvil se abre la hoja de compartir (Guardar en Archivos, AirDrop, Mensajes…); si no existe, descarga normal.
+      if (navigator.canShare && navigator.canShare({files:[file]})) {
+        navigator.share({files:[file], title:'Copia de Solo Gastos'}).catch(e => { if (e.name !== 'AbortError') toast('No se pudo compartir'); });
+        return;
+      }
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([JSON.stringify(S, null, 2)], {type:'application/json'}));
-      a.download = `solo-gastos-${iso(new Date())}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      a.href = URL.createObjectURL(new Blob([json], {type:'application/json'}));
+      a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     };
     $('#s-imp').onclick = () => $('#s-file').click();
     $('#s-file').onchange = async e => {

@@ -87,6 +87,8 @@ Al subir cambios, subir `VERSION` en `sw.js`.
 
 - El servidor de previsualización de la app no puede leer `~/Desktop` (permisos de macOS): se probó sirviendo una copia desde el scratchpad.
 
+- **Exportar en iPhone (2026-10-17):** una descarga con `<a download>` abre un visor sin forma obvia de guardar. Ahora se usa `navigator.share({files})` (hoja de compartir → «Guardar en Archivos»), con la descarga clásica como respaldo en ordenador.
+
 ## 7. Pendiente / ideas
 
 Ver la ficha del proyecto en `Cerebro/proyectos/solo-gastos.md`.
