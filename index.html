@@ -139,9 +139,9 @@ svg .f{fill:currentColor;fill-opacity:.26;stroke:none}
   transition:transform .55s var(--spring),padding .55s var(--spring),gap .55s var(--spring)}
 @keyframes fabin{from{transform:translateY(130px);opacity:0}}
 .fab .plus{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
-  background:linear-gradient(135deg,var(--mint),var(--blue));animation:plusglow 3.2s ease-in-out infinite;
+  background:linear-gradient(135deg,#86f7a4,#52e07c);animation:plusglow 3.2s ease-in-out infinite;
   transition:transform .5s var(--spring)}
-@keyframes plusglow{0%,100%{box-shadow:0 0 14px rgba(99,242,195,.35)}50%{box-shadow:0 0 30px rgba(99,242,195,.75)}}
+@keyframes plusglow{0%,100%{box-shadow:0 0 14px rgba(107,240,143,.35)}50%{box-shadow:0 0 30px rgba(107,240,143,.75)}}
 .fab:active .plus{transform:rotate(90deg) scale(.9)}
 .fab .plus svg{width:20px;height:20px;stroke:#04110d;stroke-width:2.8;fill:none;stroke-linecap:round}
 .fab .lbl{max-width:160px;overflow:hidden;white-space:nowrap;transition:max-width .55s var(--spring),opacity .3s}
@@ -938,7 +938,7 @@ function openSettings(){
     <button class="ghost" id="s-imp">Importar copia</button>
     <input type="file" id="s-file" accept="application/json" hidden>
     <button class="danger" id="s-clear">Borrar todo y empezar de cero</button>
-    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 15</p>`,
+    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 16</p>`,
   () => {
     $('#s-cats').onclick = openCats;
     $('#s-notif').onclick = async e => {
