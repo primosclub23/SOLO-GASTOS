@@ -211,6 +211,16 @@ input:focus,select:focus{border-color:rgba(99,242,195,.55)}
 .icons button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .icons button.on{background:var(--text);color:#000}
 .toast button{margin-left:14px;font-weight:700;color:#0a7a5a}
+.askin{width:92px;flex:none;text-align:right;padding:11px 13px;font-size:17px;border-radius:13px}
+.askbtn{flex:none;width:42px;height:42px;border-radius:50%;background:var(--text);color:#000;display:grid;place-items:center;font-size:24px;font-weight:600;line-height:1}
+.askbtn svg{width:18px;height:18px;stroke:#000;stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.vartag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mint);background:rgba(99,242,195,.12);padding:2px 7px;border-radius:99px;margin-left:7px;vertical-align:2px}
+.payrow{display:flex;align-items:center;gap:12px;padding:9px 2px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.payrow span{flex:1;color:var(--dim);text-transform:capitalize}
+.payrow button{width:34px;height:34px;color:var(--dim);font-size:22px;text-align:center}
+.payadd{display:flex;gap:8px;margin-top:12px;align-items:center}
+.payadd input[type=month]{flex:1.8;min-width:0;font-size:15px}
+.payadd input:not([type=month]){flex:1;min-width:0}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -392,6 +402,7 @@ function demo(){
   const dd = n => { const d = today(); d.setDate(d.getDate() + n); return iso(d); };
   const mm = n => { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - n); return ym(d); };
   let i = 0;
+  const pays = (...vs) => vs.map((v, i) => ({m:mm(vs.length - i), v}));
   const x = (name, cat, amount, freq, next, since, remind = 7, note = '') => ({id:'d' + (++i), name, cat, amount, freq, next, since, remind, note});
   return [
     x('Hipoteca','vivienda',1000,'month',dd(9),mm(8)),
@@ -401,14 +412,14 @@ function demo(){
     x('Netflix','suscripciones',14,'month',dd(11),mm(8)),
     x('Prime','suscripciones',20,'month',dd(21),mm(6)),
     x('Spotify','suscripciones',11,'month',dd(2),mm(8)),
-    x('Luz','suministros',70,'month',dd(17),mm(8)),
+    {...x('Luz','suministros',70,'month',dd(17),mm(8)), variable:true, payments:pays(62, 78, 70)},
     x('Internet + móvil','suministros',58,'month',dd(8),mm(8)),
     x('Agua','suministros',75,'quarter',dd(40),mm(8),7),
     x('Seguro del hogar','seguros',700,'year',dd(64),mm(8),30,'Póliza nº …'),
     x('Seguro del coche','seguros',480,'year',dd(12),mm(8),15,'Renovación anual'),
     x('Seguro de salud','seguros',55,'month',dd(23),mm(8)),
     x('Gasolina','transporte',120,'month','',mm(8)),
-    x('Supermercado','alimentacion',400,'month','',mm(8)),
+    {...x('Supermercado','alimentacion',400,'month','',mm(8)), variable:true, payments:pays(380, 415, 405)},
     x('Gimnasio','salud',35,'month',dd(6),mm(1)),
     x('Cenas y ocio','ocio',100,'month','',mm(8))
   ];
@@ -422,7 +433,19 @@ function load(){
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} }
 
 /* ---------- cálculos ---------- */
-const monthly = e => e.amount * FREQ[e.freq].m;
+const lastPays = e => (e.payments || []).slice(-3);
+const base = e => e.variable && (e.payments || []).length ? r2(lastPays(e).reduce((a, p) => a + p.v, 0) / lastPays(e).length) : e.amount;
+const monthly = e => base(e) * FREQ[e.freq].m;
+const monthLabel = m => `${MONTHS[+m.slice(5) - 1]} ${m.slice(0, 4)}`;
+function needsPay(e){
+  if (!e.variable || e.freq !== 'month' || !e.next) return false;
+  const t = today(), cur = ym(t), last = new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate();
+  return !(e.payments || []).some(p => p.m === cur) && t.getDate() >= Math.min(parse(e.next).getDate(), last);
+}
+function addPayment(e, m, v){
+  e.payments = (e.payments || []).filter(p => p.m !== m).concat({m, v:r2(v)}).sort((a, b) => a.m < b.m ? -1 : 1);
+  save(); render();
+}
 const total = () => r2(S.expenses.reduce((a, e) => a + monthly(e), 0));
 function history(){
   if (!S.expenses.length) return [];
@@ -432,7 +455,11 @@ function history(){
     const d = new Date(now); d.setMonth(d.getMonth() - i);
     const k = ym(d);
     if (k < start) continue;
-    const v = r2(S.expenses.reduce((a, e) => (e.since || '0000') <= k ? a + monthly(e) : a, 0));
+    const v = r2(S.expenses.reduce((a, e) => {
+      if ((e.since || '0000') > k) return a;
+      const p = e.variable && (e.payments || []).find(x => x.m === k);
+      return a + (p ? p.v * FREQ[e.freq].m : monthly(e));
+    }, 0));
     out.push({k, label:MONTHS[d.getMonth()], v});
   }
   return out;
@@ -494,6 +521,7 @@ function render(){
     const items = S.expenses.filter(e => e.cat === c.id);
     return {c, items, sum:r2(items.reduce((a, e) => a + monthly(e), 0))};
   }).filter(x => x.items.length).sort((a, b) => b.sum - a.sum);
+  const asks = S.expenses.filter(needsPay);
   const up = S.expenses.filter(e => e.next && daysUntil(e.next) <= 60).sort((a, b) => a.next.localeCompare(b.next)).slice(0, 5);
   let delta = '';
   if (h.length >= 2) {
@@ -525,6 +553,18 @@ function render(){
       : `<div class="empty" style="padding:18px 0 22px;font-size:13px">${S.expenses.length ? 'La gráfica aparecerá cuando haya al menos dos meses de datos. Si ya pagabas algo antes, indícalo en «Pagándolo desde».' : ''}</div>`}
   </section></div>
 
+  ${asks.length ? `
+  <section class="sec rise" style="--d:2">
+    <div class="sechead"><h2>¿Cuánto te cobraron?</h2><span>${MONTHS[new Date().getMonth()]}</span></div>
+    <div class="list">${asks.map(e => { const c = catOf(e.cat); return `
+      <div class="row ask" style="--c:${c.color}">
+        ${icoHTML(e, c)}
+        <span class="meta"><b>${esc(e.name)}</b><small>Suele ser ≈ ${money(base(e))} €</small></span>
+        <input class="askin" inputmode="decimal" placeholder="${money(base(e))}" aria-label="Importe cobrado de ${esc(e.name)}" autocomplete="off">
+        <button class="askbtn" data-pay="${e.id}" aria-label="Registrar cobro"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
+      </div>`; }).join('')}</div>
+  </section>` : ''}
+
   ${up.length ? `
   <section class="sec rise" style="--d:3">
     <div class="sechead"><h2>Próximos vencimientos</h2></div>
@@ -533,7 +573,7 @@ function render(){
       const cls = n <= 3 ? 'now' : (e.remind && n <= e.remind) ? 'soon' : '';
       return `<button class="row rise" data-edit="${e.id}" style="--c:${c.color};--d:${i}">
         ${icoHTML(e, c)}
-        <span class="meta"><b>${esc(e.name)}</b><small>${shortDate(e.next)} · ${money(e.amount)} €</small></span>
+        <span class="meta"><b>${esc(e.name)}</b><small>${shortDate(e.next)} · ${e.variable ? '≈ ' : ''}${money(base(e))} €</small></span>
         <span class="when ${cls}">${dueLabel(n)}</span></button>`;
     }).join('')}</div>
   </section>` : ''}
@@ -658,8 +698,8 @@ function openCat(id){
         <button class="swdel" data-del="${e.id}">Eliminar</button>
         <button class="row swrow" data-edit="${e.id}">
           ${icoHTML(e, c)}
-          <span class="meta"><b>${esc(e.name)}</b><small>${e.freq === 'month' ? 'Cada mes' : `${money(e.amount)} € / ${FREQ[e.freq].per}`}${e.next ? ' · ' + shortDate(e.next) : ''}</small></span>
-          <span class="amt">${money(r2(monthly(e)))} €<small>al mes</small></span>
+          <span class="meta"><b>${esc(e.name)}</b><small>${e.variable ? `Variable · ${(e.payments || []).length ? 'media de ' + lastPays(e).length + (lastPays(e).length === 1 ? ' cobro' : ' cobros') : 'estimación'}` : e.freq === 'month' ? 'Cada mes' : `${money(e.amount)} € / ${FREQ[e.freq].per}`}${e.next ? ' · ' + shortDate(e.next) : ''}</small></span>
+          <span class="amt">${e.variable ? '≈ ' : ''}${money(r2(monthly(e)))} €<small>al mes</small></span>
         </button>
       </div>`).join('')}</div>
     <button class="primary" data-add="${id}">Añadir a ${esc(c.name.toLowerCase())}</button>
@@ -725,6 +765,9 @@ function openForm(id, catPref){
     <div class="equiv" id="f-equiv"></div>
     <div class="field"><label>Nombre</label><div class="namerow" id="f-logo-w" style="--c:${catOf(f.cat).color}">${icoHTML(f, catOf(f.cat))}<input id="f-name" placeholder="Netflix, Repsol, seguro del coche…" value="${esc(f.name)}" autocomplete="off"></div></div>
     <div class="field"><label>Cada cuánto</label><div class="chips" id="f-freq">${Object.entries(FREQ).map(([k, v]) => `<button data-v="${k}" class="${f.freq === k ? 'on' : ''}">${v.l}</button>`).join('')}</div></div>
+    <div class="field"><label>Importe</label><div class="chips" id="f-var"><button data-v="0" class="${f.variable ? '' : 'on'}">Fijo</button><button data-v="1" class="${f.variable ? 'on' : ''}">Varía cada mes</button></div></div>
+    ${ex ? `<div class="field" id="f-pay-w" style="display:${f.variable ? '' : 'none'}"><label>Cobros registrados</label><div id="f-pays"></div>
+      <div class="payadd"><input type="month" id="p-m" value="${ym(new Date())}"><input id="p-v" inputmode="decimal" placeholder="Importe" autocomplete="off"><button class="askbtn" id="p-add" aria-label="Añadir cobro"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>` : ''}
     <div class="field"><label>Categoría</label><div class="chips cats" id="f-cat">${S.cats.map(c => `<button data-v="${c.id}" style="--c:${c.color}" class="${f.cat === c.id ? 'on' : ''}"><i></i>${esc(c.name)}</button>`).join('')}</div></div>
     <div class="field"><label>Web de la empresa (para el logo)</label><input id="f-domain" placeholder="Se detecta sola · ej. repsol.es" value="${esc(f.domain || '')}" autocapitalize="off" autocorrect="off" autocomplete="off"></div>
     <div class="field"><label>Próximo pago o vencimiento</label><input type="date" id="f-next" value="${f.next}"></div>
@@ -737,8 +780,9 @@ function openForm(id, catPref){
   sh => {
     const amt = $('#f-amount'), num = () => parseFloat(String(amt.value).replace(',', '.'));
     const eq = () => {
-      const a = num(); $('#f-equiv').innerHTML = a > 0
-        ? `= <b>${money(r2(a * FREQ[f.freq].m))} €/mes</b> · ${money(r2(a * FREQ[f.freq].m * 12))} €/año` : '';
+      const a = num(), mo = a > 0 ? r2(monthly({variable:f.variable, amount:a, freq:f.freq, payments:(ex && ex.payments) || []})) : 0;
+      $('#f-equiv').innerHTML = a > 0
+        ? (f.variable ? `Cuenta como <b>≈ ${money(mo)} €/mes</b> · media de tus últimos cobros` : `= <b>${money(mo)} €/mes</b> · ${money(r2(mo * 12))} €/año`) : '';
       $('#f-rem-w').style.display = $('#f-next').value ? '' : 'none';
     };
     let lt;
@@ -751,6 +795,27 @@ function openForm(id, catPref){
       f[key] = b.dataset.v; sh.querySelectorAll(sel + ' button').forEach(x => x.classList.toggle('on', x === b)); eq(); logo();
     });
     chips('#f-freq', 'freq'); chips('#f-cat', 'cat');
+    $('#f-var').addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      f.variable = b.dataset.v === '1'; sh.querySelectorAll('#f-var button').forEach(x => x.classList.toggle('on', x === b));
+      const w = $('#f-pay-w'); if (w) w.style.display = f.variable ? '' : 'none'; eq();
+    });
+    const drawPays = () => {
+      if (!ex) return;
+      const ps = [...(ex.payments || [])].reverse().slice(0, 6);
+      $('#f-pays').innerHTML = ps.length ? ps.map(p => `<div class="payrow"><span>${monthLabel(p.m)}</span><b>${money(p.v)} €</b><button data-p="${p.m}" aria-label="Eliminar cobro">×</button></div>`).join('')
+        : '<div class="equiv" style="text-align:left;padding:4px 0">Aún no hay cobros. Registra el primero.</div>';
+    };
+    if (ex) {
+      drawPays();
+      $('#f-pays').addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (!b) return;
+        ex.payments = ex.payments.filter(p => p.m !== b.dataset.p); save(); render(); drawPays(); eq(); });
+      $('#p-add').onclick = () => {
+        const v = parseFloat(String($('#p-v').value).replace(',', '.')), m = $('#p-m').value;
+        if (!(v > 0) || !m) { toast('Pon mes e importe'); return; }
+        addPayment(ex, m, v); $('#p-v').value = ''; drawPays(); eq();
+      };
+    }
     amt.addEventListener('input', eq); $('#f-next').addEventListener('input', eq);
     $('#f-name').addEventListener('input', logo); $('#f-domain').addEventListener('input', logo); eq();
     if (!ex) setTimeout(() => amt.focus(), 450);
@@ -758,7 +823,7 @@ function openForm(id, catPref){
       const a = num(), name = $('#f-name').value.trim();
       if (!(a > 0)) { toast('Pon un importe'); amt.focus(); return; }
       if (!name) { toast('Ponle un nombre'); $('#f-name').focus(); return; }
-      const e = {id:ex ? ex.id : 'e' + Date.now(), name, cat:f.cat, amount:r2(a), freq:f.freq, next:$('#f-next').value,
+      const e = {id:ex ? ex.id : 'e' + Date.now(), name, cat:f.cat, amount:r2(a), freq:f.freq, variable:!!f.variable, payments:(ex && ex.payments) || [], next:$('#f-next').value,
         remind:+$('#f-remind').value, since:$('#f-since').value || ym(new Date()), note:$('#f-note').value.trim(), domain:cleanDomain($('#f-domain').value)};
       rollNext(e);
       if (ex) S.expenses[S.expenses.findIndex(x => x.id === ex.id)] = e; else S.expenses.push(e);
@@ -827,8 +892,13 @@ function checkReminders(){
 
 /* ---------- eventos ---------- */
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-del],[data-ecat],[data-newcat],[data-edit],[data-cat],[data-add],#btn-set,#btn-clear,#btn-cats'); if (!t) return;
-  if (t.dataset.del) deleteExpense(t.dataset.del, true);
+  const t = e.target.closest('[data-pay],[data-del],[data-ecat],[data-newcat],[data-edit],[data-cat],[data-add],#btn-set,#btn-clear,#btn-cats'); if (!t) return;
+  if (t.dataset.pay) {
+    const e = S.expenses.find(x => x.id === t.dataset.pay), v = parseFloat(String(t.closest('.ask').querySelector('input').value).replace(',', '.'));
+    if (!(v > 0)) { toast('Escribe el importe cobrado'); return; }
+    addPayment(e, ym(new Date()), v); toast(`Cobro registrado · media ≈ ${money(base(e))} €`);
+  }
+  else if (t.dataset.del) deleteExpense(t.dataset.del, true);
   else if (t.dataset.ecat) openCatForm(t.dataset.ecat);
   else if (t.dataset.newcat) openCatForm();
   else if (t.id === 'btn-cats') openCats();
@@ -839,6 +909,7 @@ document.addEventListener('click', e => {
   else if (t.id === 'btn-clear') clearAll();
 });
 $('#fab').onclick = () => openForm();
+addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('.askin')) e.target.closest('.ask').querySelector('.askbtn').click(); });
 let lastY = 0, tick = false;
 addEventListener('scroll', () => {
   if (tick) return; tick = true;

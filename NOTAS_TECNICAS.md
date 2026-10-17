@@ -22,6 +22,7 @@ sencillez y diseño.
 
 ```json
 { "expenses": [ { "id", "name", "cat", "amount", "freq": "week|month|quarter|biannual|year",
+                  "variable": false, "payments": [{"m": "AAAA-MM", "v": 0}],
                   "next": "AAAA-MM-DD|''", "remind": 0|1|3|7|15|30, "since": "AAAA-MM", "note" } ],
   "demo": false, "notif": false }
 ```
@@ -31,6 +32,12 @@ sencillez y diseño.
 - La gráfica mes a mes se **deriva** de `since` (no hay snapshots): un gasto cuenta desde su mes `since`. Por eso el formulario pide «Pagándolo desde».
 - Categorías editables, guardadas en `S.cats` (`{id,name,color,icon}`); `DEFAULT_CATS` solo siembra la primera vez. Al borrar una categoría, sus gastos pasan a «Otros» (o a la primera que quede). Siempre debe quedar al menos una.
 - `domain` (opcional) por gasto: web para el logo. Si está vacío se deduce del nombre con el diccionario `BRANDS` (`guess()`).
+
+## 3a. Gastos variables
+
+`variable: true` + `payments` (un cobro real por mes, ordenado). El importe que cuenta es la **media de los últimos 3 cobros** (`base()`/`monthly()`); sin cobros usa `amount` como estimación. Se eligen 3 y no «todos» para que reaccione pronto a cambios de tarifa.
+- La gráfica mes a mes usa el cobro real de ese mes si existe (`history()`); el total del hero usa la media.
+- La tarjeta «¿Cuánto te cobraron?» (`needsPay()`) sale en gastos variables **mensuales con fecha** cuando ya llegó el día del mes y no hay cobro registrado. Los trimestrales/anuales variables se registran a mano desde la edición.
 
 ## 3b. Logos de empresas
 
