@@ -894,7 +894,8 @@ function openSettings(){
     <button class="ghost" id="s-exp">Exportar copia de seguridad</button>
     <button class="ghost" id="s-imp">Importar copia</button>
     <input type="file" id="s-file" accept="application/json" hidden>
-    <button class="danger" id="s-clear">Borrar todo y empezar de cero</button>`,
+    <button class="danger" id="s-clear">Borrar todo y empezar de cero</button>
+    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 11</p>`,
   () => {
     $('#s-cats').onclick = openCats;
     $('#s-notif').onclick = async e => {
@@ -993,7 +994,11 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) { S.
 
 function settleIntro(){ setTimeout(() => document.body.classList.remove('intro'), 2400); }
 load(); render(); settleIntro(); checkReminders();
-if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  const had = !!navigator.serviceWorker.controller; let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (had && !reloaded) { reloaded = true; location.reload(); } });
+  navigator.serviceWorker.register('sw.js').then(r => r.update()).catch(() => {});
+}
 </script>
 </body>
 </html>

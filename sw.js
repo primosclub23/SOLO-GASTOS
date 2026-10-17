@@ -1,5 +1,5 @@
 // Cache mínima para que la app abra sin conexión. Subir VERSION al cambiar archivos.
-const VERSION = 'sg-v10';
+const VERSION = 'sg-v11';
 const SHELL = ['./', 'index.html', 'manifest.json', 'icon.svg', 'icon-192.png', 'icon-512.png', 'icon-180.png'];
 
 self.addEventListener('install', e => {
@@ -11,7 +11,7 @@ self.addEventListener('activate', e => {
 // Red primero (siempre la última versión); si no hay red, caché.
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  e.respondWith(fetch(e.request).then(r => {
+  e.respondWith(fetch(e.request, {cache:'no-cache'}).then(r => {
     const copy = r.clone(); caches.open(VERSION).then(c => c.put(e.request, copy)); return r;
   }).catch(() => caches.match(e.request)));
 });

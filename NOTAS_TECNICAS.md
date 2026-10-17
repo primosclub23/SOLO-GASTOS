@@ -83,6 +83,8 @@ Al subir cambios, subir `VERSION` en `sw.js`.
 
 ## 6. Bugs y lecciones
 
+- **Actualizaciones que no llegaban al iPhone (2026-10-17):** GitHub Pages envía `cache-control: max-age=600` y el service worker (red primero) leía de la caché HTTP, así que la app instalada podía mostrar una versión de hasta 10 min atrás, y a veces dos aperturas. Arreglo: `fetch(..., {cache:'no-cache'})` en `sw.js`, recarga automática cuando un SW nuevo toma el control y versión visible en Ajustes. **Al publicar, subir `VERSION` en `sw.js` y el número de versión de Ajustes.**
+
 - El servidor de previsualización de la app no puede leer `~/Desktop` (permisos de macOS): se probó sirviendo una copia desde el scratchpad.
 
 ## 7. Pendiente / ideas
