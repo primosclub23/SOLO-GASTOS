@@ -61,7 +61,7 @@ Borrado de gastos: deslizar a la izquierda en la vista de categoría (o botón e
 - Scroll-reveal con `IntersectionObserver` (`.rise` → `.in`) solo en la primera pintura; los re-render posteriores quitan `.rise` para no parpadear.
 - Contadores (`.cnt`, `runCounters`) arrancan al entrar en pantalla; al editar parten del valor anterior.
 - Parallax del hero (`.par`, variable `--p`), FAB que se compacta al bajar (`.compact`) y se oculta con `body.sheet-open`, orbes de fondo con `transform`.
-- **Confirmación al guardar (`success()`, `#ok`):** réplica de la animación de Face ID, hecha a partir de una grabación de pantalla (fotogramas a 20 fps). Línea de tiempo de 2 s: la baldosa nace de la «isla» arriba y crece (`clip-path`), aparece el glifo de cara borroso, tres aros giran formando una esfera, queda un círculo, se dibuja la V y la baldosa se desvanece subiendo y desenfocándose. Cada fase es un `<svg>` aparte porque Safari no aplica `filter` a elementos internos de un SVG. Se llama al guardar un gasto, una categoría o un cobro.
+- **Confirmación al guardar (`success()`, `#ok`):** réplica de la animación de Face ID, hecha a partir de una grabación de pantalla (fotogramas a 20 fps). Línea de tiempo de 2 s: la baldosa nace en el centro de la pantalla y crece (`clip-path` + `scale`), aparece el glifo de cara borroso, tres aros giran formando una esfera, queda un círculo, se dibuja la V y la baldosa se desvanece reduciéndose y desenfocándose. Cada fase es un `<svg>` aparte porque Safari no aplica `filter` a elementos internos de un SVG. Se llama al guardar un gasto, una categoría o un cobro.
 - Todo se desactiva con `prefers-reduced-motion`.
 
 ## 3d. Iconos propios
