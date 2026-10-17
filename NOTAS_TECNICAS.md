@@ -22,7 +22,7 @@ sencillez y diseño.
 
 ```json
 { "expenses": [ { "id", "name", "cat", "amount", "freq": "week|month|quarter|biannual|year",
-                  "variable": false, "payments": [{"m": "AAAA-MM", "v": 0}],
+                  "variable": false, "payments": [{"m": "AAAA-MM", "v": 0}], "due": ["AAAA-MM"],
                   "next": "AAAA-MM-DD|''", "remind": 0|1|3|7|15|30, "since": "AAAA-MM", "note" } ],
   "demo": false, "notif": false }
 ```
@@ -38,7 +38,9 @@ sencillez y diseño.
 `variable: true` + `payments` (un cobro real por mes, ordenado). El importe que cuenta es la **media de los últimos 3 cobros** (`base()`/`monthly()`); sin cobros usa `amount` como estimación. Se eligen 3 y no «todos» para que reaccione pronto a cambios de tarifa.
 - La gráfica mes a mes usa el cobro real de ese mes si existe (`history()`); el total del hero usa la media.
 - La **campanilla** (`#btn-bell`, `notifs()`, `openBell()`) reúne los cobros por registrar (`needsPay()`) y los vencimientos dentro de su plazo de aviso (`remind`); el número del badge es la suma. Registrar el cobro desde ahí refresca la hoja. Con avisos activados, `checkReminders()` también lanza una notificación del sistema por cobro pendiente (una por gasto y mes).
-- `needsPay()` da por pendientes los gastos variables **mensuales con fecha** cuando ya llegó el día del mes y no hay cobro registrado. Los trimestrales/anuales variables se registran a mano desde la edición.
+- **Cuándo hay un cobro pendiente:** `rollNext()` avanza `next` el día **después** de la fecha de cobro y, si el gasto es variable, anota ese mes en `due` (máx. 3). `needsPay(e)` = `due` no vacío; al registrar el cobro (`addPayment`) se quita de `due`. Así el aviso aparece el día siguiente al cobro y no antes.
+- Al **crear** un gasto variable con fecha, el importe se guarda como último cobro (mes del periodo anterior a `next`), para que el primer aviso sea el del siguiente cobro.
+- **Bug corregido (2026-10-17):** antes `needsPay` miraba el día del mes y avisaba del cobro del mes en curso aunque aún faltaran semanas.
 
 ## 3b. Logos de empresas
 

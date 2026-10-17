@@ -379,16 +379,27 @@ const parse = s => new Date(s + 'T00:00:00');
 const today = () => { const d = new Date(); d.setHours(0,0,0,0); return d; };
 const ym = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
 const daysUntil = s => Math.round((parse(s) - today()) / 864e5);
-function addPeriod(s, freq){
+function addPeriod(s, freq, dir = 1){
   const d = parse(s), st = FREQ[freq].step;
-  if (st.d) d.setDate(d.getDate() + st.d);
+  if (st.d) d.setDate(d.getDate() + st.d * dir);
   else {
-    const day = d.getDate(); d.setDate(1); d.setMonth(d.getMonth() + st.m);
+    const day = d.getDate(); d.setDate(1); d.setMonth(d.getMonth() + st.m * dir);
     d.setDate(Math.min(day, new Date(d.getFullYear(), d.getMonth()+1, 0).getDate()));
   }
   return iso(d);
 }
-function rollNext(e){ if (e.next) { let n = 0; while (daysUntil(e.next) < 0 && n++ < 400) e.next = addPeriod(e.next, e.freq); } }
+// Al pasar una fecha de cobro, se avanza a la siguiente; si el gasto es variable, el mes cobrado queda pendiente de registrar.
+function rollNext(e){
+  if (!e.next) return;
+  let n = 0;
+  while (daysUntil(e.next) < 0 && n++ < 400) {
+    if (e.variable) {
+      const m = ym(parse(e.next)); e.due = e.due || [];
+      if (!e.due.includes(m) && !(e.payments || []).some(p => p.m === m) && (e.since || '0000') <= m) e.due = [...e.due, m].slice(-3);
+    }
+    e.next = addPeriod(e.next, e.freq);
+  }
+}
 const shortDate = s => { const d = parse(s); return `${d.getDate()} ${MONTHS[d.getMonth()]}`; };
 
 /* ---------- formato ---------- */
@@ -417,7 +428,7 @@ function demo(){
     x('Netflix','suscripciones',14,'month',dd(11),mm(8)),
     x('Prime','suscripciones',20,'month',dd(21),mm(6)),
     x('Spotify','suscripciones',11,'month',dd(2),mm(8)),
-    {...x('Luz','suministros',70,'month',dd(17),mm(8)), variable:true, payments:pays(62, 78, 70)},
+    {...x('Luz','suministros',70,'month',dd(17),mm(8)), variable:true, payments:pays(62, 78, 70), due:[mm(0)]},
     x('Internet + móvil','suministros',58,'month',dd(8),mm(8)),
     x('Agua','suministros',75,'quarter',dd(40),mm(8),7),
     x('Seguro del hogar','seguros',700,'year',dd(64),mm(8),30,'Póliza nº …'),
@@ -442,13 +453,10 @@ const lastPays = e => (e.payments || []).slice(-3);
 const base = e => e.variable && (e.payments || []).length ? r2(lastPays(e).reduce((a, p) => a + p.v, 0) / lastPays(e).length) : e.amount;
 const monthly = e => base(e) * FREQ[e.freq].m;
 const monthLabel = m => `${MONTHS[+m.slice(5) - 1]} ${m.slice(0, 4)}`;
-function needsPay(e){
-  if (!e.variable || e.freq !== 'month' || !e.next) return false;
-  const t = today(), cur = ym(t), last = new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate();
-  return !(e.payments || []).some(p => p.m === cur) && t.getDate() >= Math.min(parse(e.next).getDate(), last);
-}
+const needsPay = e => !!(e.variable && (e.due || []).length);
 function addPayment(e, m, v){
   e.payments = (e.payments || []).filter(p => p.m !== m).concat({m, v:r2(v)}).sort((a, b) => a.m < b.m ? -1 : 1);
+  e.due = (e.due || []).filter(x => x !== m);
   save(); render();
 }
 const total = () => r2(S.expenses.reduce((a, e) => a + monthly(e), 0));
@@ -695,7 +703,7 @@ function openBell(){
     ${asks.length ? `<div class="field"><label>Cobros por actualizar</label><div class="list">${asks.map(e => { const c = catOf(e.cat); return `
       <div class="row ask" style="--c:${c.color}">
         ${icoHTML(e, c)}
-        <span class="meta"><b>${esc(e.name)}</b><small>¿Cuánto cobraron? · ≈ ${money(base(e))} €</small></span>
+        <span class="meta"><b>${esc(e.name)}</b><small>¿Cuánto cobraron en ${MONTHS[+e.due[0].slice(5) - 1]}?</small></span>
         <input class="askin" inputmode="decimal" placeholder="${money(base(e))}" aria-label="Importe cobrado de ${esc(e.name)}" autocomplete="off">
         <button class="askbtn" data-pay="${e.id}" aria-label="Registrar cobro"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
       </div>`; }).join('')}</div></div>` : ''}
@@ -802,7 +810,7 @@ function openForm(id, catPref){
     const eq = () => {
       const a = num(), mo = a > 0 ? r2(monthly({variable:f.variable, amount:a, freq:f.freq, payments:(ex && ex.payments) || []})) : 0;
       $('#f-equiv').innerHTML = a > 0
-        ? (f.variable ? `Cuenta como <b>≈ ${money(mo)} €/mes</b> · media de tus últimos cobros` : `= <b>${money(mo)} €/mes</b> · ${money(r2(mo * 12))} €/año`) : '';
+        ? (f.variable ? `Cuenta como <b>≈ ${money(mo)} €/mes</b> · ${ex ? 'media de tus últimos cobros' : 'se guarda como tu último cobro'}` : `= <b>${money(mo)} €/mes</b> · ${money(r2(mo * 12))} €/año`) : '';
       $('#f-rem-w').style.display = $('#f-next').value ? '' : 'none';
     };
     let lt;
@@ -843,8 +851,9 @@ function openForm(id, catPref){
       const a = num(), name = $('#f-name').value.trim();
       if (!(a > 0)) { toast('Pon un importe'); amt.focus(); return; }
       if (!name) { toast('Ponle un nombre'); $('#f-name').focus(); return; }
-      const e = {id:ex ? ex.id : 'e' + Date.now(), name, cat:f.cat, amount:r2(a), freq:f.freq, variable:!!f.variable, payments:(ex && ex.payments) || [], next:$('#f-next').value,
+      const e = {id:ex ? ex.id : 'e' + Date.now(), name, cat:f.cat, amount:r2(a), freq:f.freq, variable:!!f.variable, payments:(ex && ex.payments) || [], due:(ex && ex.due) || [], next:$('#f-next').value,
         remind:+$('#f-remind').value, since:$('#f-since').value || ym(new Date()), note:$('#f-note').value.trim(), domain:cleanDomain($('#f-domain').value)};
+      if (!ex && e.variable && e.next && !e.payments.length) e.payments = [{m:ym(parse(addPeriod(e.next, e.freq, -1))), v:e.amount}];
       rollNext(e);
       if (ex) S.expenses[S.expenses.findIndex(x => x.id === ex.id)] = e; else S.expenses.push(e);
       save(); closeSheet(); render(); checkReminders(); toast(ex ? 'Gasto actualizado' : 'Gasto añadido');
@@ -908,7 +917,7 @@ function checkReminders(){
       .catch(() => new Notification('Solo Gastos', {body}));
   });
   S.expenses.filter(needsPay).forEach(e => {
-    const k = 'pay|' + e.id + '|' + ym(new Date());
+    const k = 'pay|' + e.id + '|' + e.due[0];
     if (seen[k]) return;
     seen[k] = 1;
     const body = `¿Cuánto te cobraron de ${e.name}? Regístralo para ajustar la media.`;
@@ -925,7 +934,7 @@ document.addEventListener('click', e => {
     const e = S.expenses.find(x => x.id === t.dataset.pay), v = parseFloat(String(t.closest('.ask').querySelector('input').value).replace(',', '.'));
     if (!(v > 0)) { toast('Escribe el importe cobrado'); return; }
     const inSheet = !!t.closest('#sheet');
-    addPayment(e, ym(new Date()), v); toast(`Cobro registrado · media ≈ ${money(base(e))} €`);
+    addPayment(e, e.due[0], v); toast(`Cobro registrado · media ≈ ${money(base(e))} €`);
     if (inSheet) openBell();
   }
   else if (t.dataset.del) deleteExpense(t.dataset.del, true);
