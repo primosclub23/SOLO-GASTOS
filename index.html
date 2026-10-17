@@ -367,6 +367,7 @@ function icoHTML(e, c){
 const FREQ = {
   week:    {l:'Semanal',    m:52/12, per:'semana',    step:{d:7}},
   month:   {l:'Mensual',    m:1,     per:'mes',       step:{m:1}},
+  bimonth: {l:'Bimestral',  m:1/2,   per:'2 meses',   step:{m:2}},
   quarter: {l:'Trimestral', m:1/3,   per:'trimestre', step:{m:3}},
   biannual:{l:'Semestral',  m:1/6,   per:'semestre',  step:{m:6}},
   year:    {l:'Anual',      m:1/12,  per:'año',       step:{m:12}}
@@ -430,7 +431,7 @@ function demo(){
     x('Spotify','suscripciones',11,'month',dd(2),mm(8)),
     {...x('Luz','suministros',70,'month',dd(17),mm(8)), variable:true, payments:pays(62, 78, 70), due:[mm(0)]},
     x('Internet + móvil','suministros',58,'month',dd(8),mm(8)),
-    x('Agua','suministros',75,'quarter',dd(40),mm(8),7),
+    x('Agua','suministros',50,'bimonth',dd(40),mm(8),7),
     x('Seguro del hogar','seguros',700,'year',dd(64),mm(8),30,'Póliza nº …'),
     x('Seguro del coche','seguros',480,'year',dd(12),mm(8),15,'Renovación anual'),
     x('Seguro de salud','seguros',55,'month',dd(23),mm(8)),

@@ -21,7 +21,7 @@ sencillez y diseño.
 ## 3. Modelo de datos
 
 ```json
-{ "expenses": [ { "id", "name", "cat", "amount", "freq": "week|month|quarter|biannual|year",
+{ "expenses": [ { "id", "name", "cat", "amount", "freq": "week|month|bimonth|quarter|biannual|year",
                   "variable": false, "payments": [{"m": "AAAA-MM", "v": 0}], "due": ["AAAA-MM"],
                   "next": "AAAA-MM-DD|''", "remind": 0|1|3|7|15|30, "since": "AAAA-MM", "note" } ],
   "demo": false, "notif": false }
