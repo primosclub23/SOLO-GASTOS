@@ -238,19 +238,38 @@ input:focus,select:focus{border-color:rgba(99,242,195,.55)}
 .fold{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .55s var(--spring),opacity .35s}
 .fold.open{grid-template-rows:1fr;opacity:1}
 .foldin{overflow:hidden;min-height:0}
-/* confirmación al guardar */
-.ok{position:fixed;left:50%;top:50%;z-index:60;width:152px;height:152px;margin:-76px 0 0 -76px;border-radius:46px;background:#000;
-  border:1px solid rgba(107,240,143,.16);box-shadow:0 30px 80px rgba(0,0,0,.75),0 0 70px rgba(107,240,143,.14);
-  display:grid;place-items:center;opacity:0;transform:scale(.7);pointer-events:none}
-.ok svg{width:88px;height:88px;fill:none;stroke:#6bf08f;stroke-width:5.5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 8px rgba(107,240,143,.55))}
-.ok circle{stroke-dasharray:1;stroke-dashoffset:1;transform:rotate(-90deg);transform-origin:50% 50%}
-.ok path{stroke-dasharray:1;stroke-dashoffset:1}
-.ok.show{animation:okin 1.6s var(--ease) both}
-.ok.show circle{animation:okdraw .6s .12s var(--ease) forwards}
-.ok.show path{animation:okdraw .42s .58s var(--ease) forwards}
-@keyframes okin{0%{opacity:0;transform:scale(.7)}12%{opacity:1;transform:scale(1.05)}22%{transform:scale(1)}78%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.93)}}
+/* confirmación al guardar: réplica de la animación de Face ID (isla → cara → esfera → círculo → V) */
+.ok{position:fixed;left:50%;top:11px;z-index:60;width:144px;height:144px;margin-left:-72px;border-radius:44px;background:#000;
+  border:1px solid rgba(107,240,143,.17);opacity:0;pointer-events:none;clip-path:inset(0 22% 76% 22% round 18px)}
+.ok svg{position:absolute;inset:0;width:100%;height:100%;fill:none;stroke:#6bf08f;stroke-width:4.2;stroke-linecap:round;stroke-linejoin:round;overflow:visible;
+  filter:drop-shadow(0 0 5px rgba(107,240,143,.6))}
+.ok .face,.ok .orbs,.ok .ring{opacity:0}
+.ok .face{stroke-width:3.6}
+.ok .orbs circle{transform-box:fill-box;transform-origin:50% 50%}
+.ok .ring path{stroke-dasharray:1;stroke-dashoffset:1}
+.ok.show{animation:okin 2s linear both}
+.ok.show .face{animation:okface .5s .14s ease-out both}
+.ok.show .orbs{animation:okorbs .6s .4s linear both}
+.ok.show .orbs .a{animation:orbA .6s .4s ease-in-out both}
+.ok.show .orbs .b{animation:orbB .6s .4s ease-in-out both}
+.ok.show .orbs .c{animation:orbC .6s .4s ease-in-out both}
+.ok.show .ring{animation:okring .16s .88s linear both}
+.ok.show .ring path{animation:okdraw .36s 1s var(--ease) forwards}
+@keyframes okin{
+  0%{opacity:0;clip-path:inset(0 22% 76% 22% round 18px);transform:none;filter:none;animation-timing-function:cubic-bezier(.2,.9,.25,1.04)}
+  3%{opacity:1}
+  11%{opacity:1;clip-path:inset(0 0 0 0 round 44px);animation-timing-function:linear}
+  80%{opacity:1;clip-path:inset(0 0 0 0 round 44px);transform:none;filter:none;animation-timing-function:ease-in}
+  100%{opacity:0;clip-path:inset(0 0 0 0 round 44px);transform:translateY(-8px) scale(.72);filter:blur(5px)}
+}
+@keyframes okface{0%{opacity:0;filter:blur(6px) drop-shadow(0 0 5px rgba(107,240,143,.6));transform:scale(.82)}35%{opacity:1;filter:blur(2px) drop-shadow(0 0 5px rgba(107,240,143,.6))}70%{opacity:1;filter:blur(0) drop-shadow(0 0 5px rgba(107,240,143,.6));transform:scale(1)}100%{opacity:0;transform:scale(1.12)}}
+@keyframes okorbs{0%{opacity:0}12%{opacity:1}100%{opacity:1}}
+@keyframes orbA{0%{transform:rotate(0deg) scaleX(1)}30%{transform:rotate(60deg) scaleX(.18)}65%{transform:rotate(130deg) scaleX(.85)}100%{transform:rotate(180deg) scaleX(1)}}
+@keyframes orbB{0%{transform:rotate(60deg) scaleX(.22)}35%{transform:rotate(120deg) scaleX(1)}70%{transform:rotate(200deg) scaleX(.2)}100%{transform:rotate(240deg) scaleX(1)}}
+@keyframes orbC{0%{transform:rotate(120deg) scaleX(.6)}40%{transform:rotate(190deg) scaleX(.12)}75%{transform:rotate(260deg) scaleX(.7)}100%{transform:rotate(300deg) scaleX(1)}}
+@keyframes okring{to{opacity:1}}
 @keyframes okdraw{to{stroke-dashoffset:0}}
-@media (prefers-reduced-motion:reduce){.ok.show{opacity:1;transform:none}.ok circle,.ok path{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){.ok.show{opacity:1;clip-path:none}.ok .ring{opacity:1}.ok .ring path{stroke-dashoffset:0}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -261,7 +280,11 @@ input:focus,select:focus{border-color:rgba(99,242,195,.55)}
 <div class="overlay" id="overlay"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
 <div class="toast" id="toast"></div>
-<div class="ok" id="ok" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" pathLength="1"/><path d="M31 52l14 14 25-29" pathLength="1"/></svg></div>
+<div class="ok" id="ok" aria-hidden="true">
+  <svg class="face" viewBox="0 0 100 100"><path d="M26 38v-8a6 6 0 0 1 6-6h8M60 24h8a6 6 0 0 1 6 6v8M74 62v8a6 6 0 0 1-6 6h-8M40 76h-8a6 6 0 0 1-6-6v-8M39 42v5M61 42v5M50 42v10h-4M40 62c6 5 14 5 20 0"/></svg>
+  <svg class="orbs" viewBox="0 0 100 100"><circle class="a" cx="50" cy="50" r="38"/><circle class="b" cx="50" cy="50" r="38"/><circle class="c" cx="50" cy="50" r="38"/></svg>
+  <svg class="ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="38"/><path d="M32 52l14 14 24-29" pathLength="1"/></svg>
+</div>
 
 <script>
 const $ = s => document.querySelector(s);
@@ -687,8 +710,8 @@ function closeSheet(){
 let okT;
 function success(){
   const el = $('#ok'); el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
-  if (navigator.vibrate) navigator.vibrate([8, 40, 14]);
-  clearTimeout(okT); okT = setTimeout(() => el.classList.remove('show'), 1700);
+  setTimeout(() => navigator.vibrate && navigator.vibrate([10, 50, 16]), 1000);
+  clearTimeout(okT); okT = setTimeout(() => el.classList.remove('show'), 2100);
 }
 function toast(msg, label, fn){
   const t = $('#toast'); t.textContent = msg;
@@ -915,7 +938,7 @@ function openSettings(){
     <button class="ghost" id="s-imp">Importar copia</button>
     <input type="file" id="s-file" accept="application/json" hidden>
     <button class="danger" id="s-clear">Borrar todo y empezar de cero</button>
-    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 13</p>`,
+    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 14</p>`,
   () => {
     $('#s-cats').onclick = openCats;
     $('#s-notif').onclick = async e => {
