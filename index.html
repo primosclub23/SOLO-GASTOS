@@ -188,8 +188,14 @@ input:focus,select:focus{border-color:rgba(99,242,195,.55)}
 .toast{position:fixed;z-index:40;left:50%;top:calc(env(safe-area-inset-top) + 14px);transform:translate(-50%,-90px);padding:12px 18px;border-radius:99px;
   background:#f5f5f7;color:#000;font-weight:600;font-size:14px;transition:transform .5s var(--spring);max-width:90vw;text-align:center}
 .toast.show{transform:translate(-50%,0)}
-.ico img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:9px;background:#fff;opacity:0;transition:opacity .35s}
+.ico.has{background:linear-gradient(160deg,#2b2d32,#0c0d0f 70%);border-color:rgba(255,255,255,.13);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -10px 16px rgba(0,0,0,.35),0 8px 20px rgba(0,0,0,.5)}
+.ico.has>svg{opacity:0}
+.ico .lg{position:absolute;inset:0;display:grid;place-items:center;animation:fade .5s both}
+.ico .lg svg{width:66%;height:66%;fill:var(--lc,#fff);stroke:none;filter:drop-shadow(0 0 7px color-mix(in srgb,var(--lc,#fff) 55%,transparent))}
+.ico img{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .35s}
 .ico img.ok{opacity:1}
+.ico img.full{object-fit:cover}
+.ico img.fav{object-fit:contain;padding:7px}
 .link{font-size:14px;font-weight:600;color:var(--mint);padding:4px 2px}
 .sw{position:relative;border-radius:22px;overflow:hidden}
 .swdel{position:absolute;right:0;top:0;bottom:0;width:100px;background:#ff453a;color:#fff;font-weight:650;font-size:15px;text-align:center}
@@ -291,10 +297,57 @@ function cleanDomain(s){
   s = String(s || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split(/[\/?#]/)[0];
   return /^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(s) ? s : '';
 }
-const logoURL = d => `https://www.google.com/s2/favicons?domain=${encodeURIComponent(d)}&sz=128`;
+const SI_SLUG = {'max.com':'hbomax','steampowered.com':'steam','bancosantander.es':'santander','glovoapp.com':'glovo','just-eat.es':'justeat',
+  'gemini.google.com':'googlegemini','one.google.com':'google','music.apple.com':'applemusic','chat.openai.com':'openai','dgt.es':'','ps plus':'playstation'};
+const SI_COLOR = {netflix:'#E50914',spotify:'#1DB954',youtube:'#FF2D2D',apple:'#FFFFFF',amazon:'#FF9900',primevideo:'#1BA7FF',github:'#FFFFFF',openai:'#FFFFFF',
+  anthropic:'#D97757',claude:'#D97757',google:'#4285F4',googlegemini:'#8AB4F8',microsoft:'#00A4EF',xbox:'#2FB344',playstation:'#2E8BFF',nintendo:'#E60012',steam:'#FFFFFF',
+  twitch:'#9146FF',vodafone:'#E60000',orange:'#FF7900',movistar:'#019DF4',telefonica:'#2F7BFF',santander:'#EC0000',bbva:'#5AA0E8',ing:'#FF6200',revolut:'#FFFFFF',
+  paypal:'#3B7BBF',wise:'#9FE870',n26:'#36A18B',uber:'#FFFFFF',ubereats:'#06C167',cabify:'#8B63F0',bolt:'#34D186',glovo:'#FFC244',justeat:'#F36D00',airbnb:'#FF5A5F',
+  booking:'#4A86E8',tesla:'#E82127',notion:'#FFFFFF',dropbox:'#3D8BFF',adobe:'#FF3B30',canva:'#00C4CC',figma:'#F24E1E',slack:'#E01E5A',zoom:'#2D8CFF',
+  tradingview:'#4C7DFF',linkedin:'#2D8CD8',duolingo:'#58CC02',patreon:'#FF424D',tinder:'#FF6B6B',vercel:'#FFFFFF',cloudflare:'#F38020',disneyplus:'#5B7BFF',
+  hbomax:'#B535F6',ikea:'#2F7FD0',decathlon:'#5B67E0',zara:'#FFFFFF',wallapop:'#13C1AC',vinted:'#09B1BA',ryanair:'#4A7BD6',iberia:'#D7192D',vueling:'#FFCC00',
+  renfe:'#C04AC0',idealista:'#C8D400',audible:'#F8991C',kindle:'#FF9900',icloud:'#3D9BFF',applemusic:'#FA243C'};
+const siSlug = d => { if (d in SI_SLUG) return SI_SLUG[d]; const p = d.split('.'); return (p.length > 2 ? p[p.length - 2] : p[0]).replace(/[^a-z0-9]/g, ''); };
+const LKEY = 'sologastos.logos'; let LC = {}; try { LC = JSON.parse(localStorage.getItem(LKEY)) || {}; } catch {}
+const memLogo = {}, pend = {};
+const probe = u => new Promise(res => { const i = new Image(), to = setTimeout(() => res(false), 6000); i.onload = () => { clearTimeout(to); res(true); }; i.onerror = () => { clearTimeout(to); res(false); }; i.src = u; });
+async function resolveLogo(d){
+  if (LC[d]) return LC[d];
+  if (memLogo[d]) return memLogo[d];
+  return pend[d] || (pend[d] = (async () => {
+    const slug = siSlug(d);
+    if (slug) try {
+      const r = await fetch(`https://cdn.jsdelivr.net/npm/simple-icons@13.21.0/icons/${slug}.svg`);
+      const m = r.ok && (await r.text()).match(/<path d="([^"]+)"/);
+      if (m) { LC[d] = {t:'si', p:m[1], c:SI_COLOR[slug] || '#FFFFFF'}; }
+    } catch {}
+    if (!LC[d]) {
+      const ti = `https://${d}/apple-touch-icon.png`, fv = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(d)}&sz=128`;
+      if (await probe(ti)) LC[d] = {t:'ti', u:ti};
+      else if (await probe(fv)) LC[d] = {t:'fav', u:fv};
+    }
+    delete pend[d];
+    if (LC[d]) { try { localStorage.setItem(LKEY, JSON.stringify(LC)); } catch {} return LC[d]; }
+    return memLogo[d] = {t:'none'};
+  })());
+}
+function paintLogo(el, L){
+  el.classList.add('has');
+  if (L.t === 'si') el.insertAdjacentHTML('beforeend', `<span class="lg" style="--lc:${L.c}"><svg viewBox="0 0 24 24"><path d="${L.p}"/></svg></span>`);
+  else { const i = new Image(); i.alt = ''; i.referrerPolicy = 'no-referrer'; i.className = L.t === 'ti' ? 'full' : 'fav';
+    i.onload = () => i.classList.add('ok'); i.onerror = () => { i.remove(); el.classList.remove('has'); }; i.src = L.u; el.append(i); }
+}
+function hydrateLogos(){
+  document.querySelectorAll('.ico[data-d]:not([data-h])').forEach(async el => {
+    el.dataset.h = 1;
+    const L = await resolveLogo(el.dataset.d);
+    if (L.t !== 'none' && el.isConnected) paintLogo(el, L);
+  });
+}
+new MutationObserver(() => { if (!hydrateLogos.q) hydrateLogos.q = requestAnimationFrame(() => { hydrateLogos.q = 0; hydrateLogos(); }); }).observe(document.body, {childList:true, subtree:true});
 function icoHTML(e, c){
   const d = e.domain || guess(e.name);
-  return `<span class="ico"><svg viewBox="0 0 24 24">${ICONS[c.icon] || ICONS.dots}</svg>${d ? `<img alt="" loading="lazy" referrerpolicy="no-referrer" src="${logoURL(d)}" onload="this.classList.add('ok')" onerror="this.remove()">` : ''}</span>`;
+  return `<span class="ico"${d ? ` data-d="${esc(d)}"` : ''}><svg viewBox="0 0 24 24">${ICONS[c.icon] || ICONS.dots}</svg></span>`;
 }
 const FREQ = {
   week:    {l:'Semanal',    m:52/12, per:'semana',    step:{d:7}},

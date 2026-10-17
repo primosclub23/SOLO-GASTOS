@@ -34,8 +34,16 @@ sencillez y diseño.
 
 ## 3b. Logos de empresas
 
-Favicon por dominio desde `https://www.google.com/s2/favicons?domain=…&sz=128`, sobre una baldosa blanca; si no carga, se queda el icono de la categoría.
-**Privacidad:** el navegador pide a Google el dominio de cada empresa (no importes ni datos del usuario). Si molesta, se puede cambiar a logos locales.
+Cada gasto tiene un dominio (`domain`, o deducido del nombre con `BRANDS`/`guess()`). `resolveLogo()` busca el logo en cascada y lo guarda en `localStorage` (`sologastos.logos`):
+
+1. **Simple Icons** (jsDelivr, `simple-icons@13.21.0`): logo vectorial inline, en el color de marca de `SI_COLOR` (blanco si no está), grande sobre baldosa negra.
+2. **`/apple-touch-icon.png`** de la propia web: icono a sangre completa.
+3. **Favicon de Google** (`s2/favicons`, 64 px): sobre baldosa negra, con margen.
+4. Si nada carga, se queda el icono duotono de la categoría.
+
+`hydrateLogos()` (con `MutationObserver`) pinta los logos en cualquier `.ico[data-d]` nuevo.
+**Privacidad:** el navegador pide a jsDelivr, a la web de la empresa y/o a Google el dominio de la empresa (nunca importes ni datos del usuario).
+**Lección:** Google y las webs no envían CORS, así que no se puede analizar el píxel del favicon (p. ej. para invertir logos oscuros); por eso Simple Icons va primero y lleva su propio color.
 Borrado de gastos: deslizar a la izquierda en la vista de categoría (o botón en la edición) con «Deshacer» durante 5 s.
 
 ## 3c. Animaciones
