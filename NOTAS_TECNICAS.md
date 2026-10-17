@@ -67,6 +67,10 @@ Borrado de gastos: deslizar a la izquierda en la vista de categoría (o botón e
 
 Los iconos de categoría (y el de reserva cuando no hay favicon) son SVG **duotono** definidos en `ICONS`: cada uno lleva una capa rellena (`class="f"`, 26 % de opacidad) y un trazo de 1,7 px. La baldosa `.ico` es un degradado radial del color de la categoría con borde, brillo superior y resplandor. Para añadir un icono: nueva entrada en `ICONS` con ese formato; aparece solo en el selector de categorías.
 
+## 3e. Secciones plegables
+
+«Próximos vencimientos» se pliega con una animación de altura (`.fold` con `grid-template-rows:0fr→1fr`). La elección se guarda en `localStorage` (`sologastos.ui`, clave `up`; por defecto abierta) y plegada muestra un resumen («5 · en 2 días»).
+
 ## 4. Avisos
 
 Notification API, comprobación **al abrir la app** (y al volver a primer plano). Un aviso por gasto y vencimiento (`sologastos.notified`).

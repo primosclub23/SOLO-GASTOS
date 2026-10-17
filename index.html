@@ -226,6 +226,18 @@ input:focus,select:focus{border-color:rgba(99,242,195,.55)}
 .bell .badge{position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--up);color:#1a0604;font:700 11px/18px -apple-system,system-ui,sans-serif;font-style:normal;text-align:center;box-shadow:0 0 0 2px var(--bg);animation:pop .6s 1.2s var(--spring) backwards}
 .bell.has svg{animation:ring 1.4s 1.6s var(--ease) 1;transform-origin:50% 8%}
 @keyframes ring{0%,100%{transform:rotate(0)}15%{transform:rotate(16deg)}30%{transform:rotate(-13deg)}45%{transform:rotate(9deg)}60%{transform:rotate(-6deg)}75%{transform:rotate(3deg)}}
+.sechead.tog{width:100%;align-items:center;gap:10px}
+.tog h2{flex:0 1 auto;white-space:nowrap}
+.tog .sum{flex:1;min-width:0;text-align:right;font-size:13px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity .3s}
+.tog[aria-expanded=true]{margin-bottom:12px}
+.tog[aria-expanded=false]{margin-bottom:0}
+.tog[aria-expanded=true] .sum{opacity:0}
+.tog .chev{flex:none;width:30px;height:30px;border-radius:50%;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center}
+.tog .chev svg{width:15px;height:15px;stroke:var(--text);stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:transform .5s var(--spring)}
+.tog[aria-expanded=true] .chev svg{transform:rotate(180deg)}
+.fold{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .55s var(--spring),opacity .35s}
+.fold.open{grid-template-rows:1fr;opacity:1}
+.foldin{overflow:hidden;min-height:0}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -481,6 +493,9 @@ function history(){
 const dueLabel = n => n === 0 ? 'Hoy' : n === 1 ? 'Mañana' : `En ${n} días`;
 
 /* ---------- render ---------- */
+const UIKEY = 'sologastos.ui';
+const getUI = (k, d) => { try { const v = (JSON.parse(localStorage.getItem(UIKEY)) || {})[k]; return v === undefined ? d : v; } catch { return d; } };
+const setUI = (k, v) => { try { const o = JSON.parse(localStorage.getItem(UIKEY)) || {}; o[k] = v; localStorage.setItem(UIKEY, JSON.stringify(o)); } catch {} };
 const prev = {}, prevCnt = {};
 let painted = false, io, cio;
 const cnt = (k, v) => `<span class="cnt" data-k="${k}" data-v="${v}">${money(v)}</span>`;
@@ -535,7 +550,7 @@ function render(){
     const items = S.expenses.filter(e => e.cat === c.id);
     return {c, items, sum:r2(items.reduce((a, e) => a + monthly(e), 0))};
   }).filter(x => x.items.length).sort((a, b) => b.sum - a.sum);
-  const nf = notifs(), nn = nf.asks.length + nf.soon.length;
+  const nf = notifs(), nn = nf.asks.length + nf.soon.length, upOpen = getUI('up', true);
   const up = S.expenses.filter(e => e.next && daysUntil(e.next) <= 60).sort((a, b) => a.next.localeCompare(b.next)).slice(0, 5);
   let delta = '';
   if (h.length >= 2) {
@@ -570,7 +585,12 @@ function render(){
 
   ${up.length ? `
   <section class="sec rise" style="--d:3">
-    <div class="sechead"><h2>Próximos vencimientos</h2></div>
+    <button class="sechead tog" id="tog-up" aria-expanded="${upOpen}" aria-controls="fold-up">
+      <h2>Próximos vencimientos</h2>
+      <span class="sum">${up.length} · ${dueLabel(daysUntil(up[0].next)).toLowerCase()}</span>
+      <span class="chev"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
+    </button>
+    <div class="fold${upOpen ? ' open' : ''}" id="fold-up"><div class="foldin">
     <div class="list">${up.map((e, i) => {
       const n = daysUntil(e.next), c = catOf(e.cat);
       const cls = n <= 3 ? 'now' : (e.remind && n <= e.remind) ? 'soon' : '';
@@ -579,6 +599,7 @@ function render(){
         <span class="meta"><b>${esc(e.name)}</b><small>${shortDate(e.next)} · ${e.variable ? '≈ ' : ''}${money(base(e))} €</small></span>
         <span class="when ${cls}">${dueLabel(n)}</span></button>`;
     }).join('')}</div>
+    </div></div>
   </section>` : ''}
 
   <section class="sec rise" style="--d:4">
@@ -930,8 +951,12 @@ function checkReminders(){
 
 /* ---------- eventos ---------- */
 document.addEventListener('click', e => {
-  const t = e.target.closest('#btn-bell,[data-pay],[data-del],[data-ecat],[data-newcat],[data-edit],[data-cat],[data-add],#btn-set,#btn-clear,#btn-cats'); if (!t) return;
-  if (t.dataset.pay) {
+  const t = e.target.closest('#tog-up,#btn-bell,[data-pay],[data-del],[data-ecat],[data-newcat],[data-edit],[data-cat],[data-add],#btn-set,#btn-clear,#btn-cats'); if (!t) return;
+  if (t.id === 'tog-up') {
+    const open = t.getAttribute('aria-expanded') !== 'true';
+    t.setAttribute('aria-expanded', open); $('#fold-up').classList.toggle('open', open); setUI('up', open);
+  }
+  else if (t.dataset.pay) {
     const e = S.expenses.find(x => x.id === t.dataset.pay), v = parseFloat(String(t.closest('.ask').querySelector('input').value).replace(',', '.'));
     if (!(v > 0)) { toast('Escribe el importe cobrado'); return; }
     const inSheet = !!t.closest('#sheet');
