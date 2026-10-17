@@ -238,6 +238,19 @@ input:focus,select:focus{border-color:rgba(99,242,195,.55)}
 .fold{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .55s var(--spring),opacity .35s}
 .fold.open{grid-template-rows:1fr;opacity:1}
 .foldin{overflow:hidden;min-height:0}
+/* confirmación al guardar */
+.ok{position:fixed;left:50%;top:50%;z-index:60;width:152px;height:152px;margin:-76px 0 0 -76px;border-radius:46px;background:#000;
+  border:1px solid rgba(107,240,143,.16);box-shadow:0 30px 80px rgba(0,0,0,.75),0 0 70px rgba(107,240,143,.14);
+  display:grid;place-items:center;opacity:0;transform:scale(.7);pointer-events:none}
+.ok svg{width:88px;height:88px;fill:none;stroke:#6bf08f;stroke-width:5.5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 8px rgba(107,240,143,.55))}
+.ok circle{stroke-dasharray:1;stroke-dashoffset:1;transform:rotate(-90deg);transform-origin:50% 50%}
+.ok path{stroke-dasharray:1;stroke-dashoffset:1}
+.ok.show{animation:okin 1.6s var(--ease) both}
+.ok.show circle{animation:okdraw .6s .12s var(--ease) forwards}
+.ok.show path{animation:okdraw .42s .58s var(--ease) forwards}
+@keyframes okin{0%{opacity:0;transform:scale(.7)}12%{opacity:1;transform:scale(1.05)}22%{transform:scale(1)}78%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.93)}}
+@keyframes okdraw{to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){.ok.show{opacity:1;transform:none}.ok circle,.ok path{stroke-dashoffset:0}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -248,6 +261,7 @@ input:focus,select:focus{border-color:rgba(99,242,195,.55)}
 <div class="overlay" id="overlay"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
 <div class="toast" id="toast"></div>
+<div class="ok" id="ok" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" pathLength="1"/><path d="M31 52l14 14 25-29" pathLength="1"/></svg></div>
 
 <script>
 const $ = s => document.querySelector(s);
@@ -670,6 +684,12 @@ function closeSheet(){
   document.body.style.overflow = ''; document.body.classList.remove('sheet-open');
   closing = setTimeout(() => { sh.innerHTML = ''; }, 500);
 }
+let okT;
+function success(){
+  const el = $('#ok'); el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+  if (navigator.vibrate) navigator.vibrate([8, 40, 14]);
+  clearTimeout(okT); okT = setTimeout(() => el.classList.remove('show'), 1700);
+}
 function toast(msg, label, fn){
   const t = $('#toast'); t.textContent = msg;
   if (label) { const b = document.createElement('button'); b.textContent = label; b.onclick = () => { t.classList.remove('show'); fn(); }; t.append(b); }
@@ -792,7 +812,7 @@ function openCatForm(id){
       if (!name) { toast('Ponle un nombre'); $('#c-name').focus(); return; }
       if (ex) Object.assign(ex, {name, color:f.color, icon:f.icon});
       else S.cats.push({id:'c' + Date.now(), name, color:f.color, icon:f.icon});
-      save(); render(); openCats();
+      save(); render(); openCats(); success();
     };
     if (ex) $('#c-del').onclick = () => {
       if (S.cats.length <= 1) { toast('Debe quedar al menos una categoría'); return; }
@@ -878,7 +898,7 @@ function openForm(id, catPref){
       if (!ex && e.variable && e.next && !e.payments.length) e.payments = [{m:ym(parse(addPeriod(e.next, e.freq, -1))), v:e.amount}];
       rollNext(e);
       if (ex) S.expenses[S.expenses.findIndex(x => x.id === ex.id)] = e; else S.expenses.push(e);
-      save(); closeSheet(); render(); checkReminders(); toast(ex ? 'Gasto actualizado' : 'Gasto añadido');
+      save(); closeSheet(); render(); checkReminders(); success();
     };
     if (ex) $('#f-del').onclick = () => deleteExpense(ex.id, false);
   });
@@ -895,7 +915,7 @@ function openSettings(){
     <button class="ghost" id="s-imp">Importar copia</button>
     <input type="file" id="s-file" accept="application/json" hidden>
     <button class="danger" id="s-clear">Borrar todo y empezar de cero</button>
-    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 12</p>`,
+    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 13</p>`,
   () => {
     $('#s-cats').onclick = openCats;
     $('#s-notif').onclick = async e => {
@@ -968,7 +988,7 @@ document.addEventListener('click', e => {
     const e = S.expenses.find(x => x.id === t.dataset.pay), v = parseFloat(String(t.closest('.ask').querySelector('input').value).replace(',', '.'));
     if (!(v > 0)) { toast('Escribe el importe cobrado'); return; }
     const inSheet = !!t.closest('#sheet');
-    addPayment(e, e.due[0], v); toast(`Cobro registrado · media ≈ ${money(base(e))} €`);
+    addPayment(e, e.due[0], v); success(); toast(`Cobro registrado · media ≈ ${money(base(e))} €`);
     if (inSheet) openBell();
   }
   else if (t.dataset.del) deleteExpense(t.dataset.del, true);

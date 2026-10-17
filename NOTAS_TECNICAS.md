@@ -61,6 +61,7 @@ Borrado de gastos: deslizar a la izquierda en la vista de categoría (o botón e
 - Scroll-reveal con `IntersectionObserver` (`.rise` → `.in`) solo en la primera pintura; los re-render posteriores quitan `.rise` para no parpadear.
 - Contadores (`.cnt`, `runCounters`) arrancan al entrar en pantalla; al editar parten del valor anterior.
 - Parallax del hero (`.par`, variable `--p`), FAB que se compacta al bajar (`.compact`) y se oculta con `body.sheet-open`, orbes de fondo con `transform`.
+- **Confirmación al guardar:** `success()` muestra una baldosa negra con círculo y V verde que se dibujan (`#ok`, trazos con `pathLength=1`) y una vibración corta. Se llama al guardar un gasto, una categoría o un cobro.
 - Todo se desactiva con `prefers-reduced-motion`.
 
 ## 3d. Iconos propios
