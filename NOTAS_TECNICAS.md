@@ -37,7 +37,8 @@ sencillez y diseño.
 
 `variable: true` + `payments` (un cobro real por mes, ordenado). El importe que cuenta es la **media de los últimos 3 cobros** (`base()`/`monthly()`); sin cobros usa `amount` como estimación. Se eligen 3 y no «todos» para que reaccione pronto a cambios de tarifa.
 - La gráfica mes a mes usa el cobro real de ese mes si existe (`history()`); el total del hero usa la media.
-- La tarjeta «¿Cuánto te cobraron?» (`needsPay()`) sale en gastos variables **mensuales con fecha** cuando ya llegó el día del mes y no hay cobro registrado. Los trimestrales/anuales variables se registran a mano desde la edición.
+- La **campanilla** (`#btn-bell`, `notifs()`, `openBell()`) reúne los cobros por registrar (`needsPay()`) y los vencimientos dentro de su plazo de aviso (`remind`); el número del badge es la suma. Registrar el cobro desde ahí refresca la hoja. Con avisos activados, `checkReminders()` también lanza una notificación del sistema por cobro pendiente (una por gasto y mes).
+- `needsPay()` da por pendientes los gastos variables **mensuales con fecha** cuando ya llegó el día del mes y no hay cobro registrado. Los trimestrales/anuales variables se registran a mano desde la edición.
 
 ## 3b. Logos de empresas
 
