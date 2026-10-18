@@ -340,6 +340,7 @@ details.mdet[open]>summary span::after{transform:translateY(0) rotate(225deg)}
 .mtot{display:flex;justify-content:space-between;margin:4px 0 6px 14px;padding:10px 2px;border-top:1px dashed var(--line);font-variant-numeric:tabular-nums}
 .mtot b{font-size:17px}
 details.mdet[open] .bline,details.mdet[open] .mtot{animation:rise .4s var(--ease) backwards}
+.hint{display:block;margin-top:7px;font-size:12px;color:var(--dim);min-height:15px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -452,10 +453,10 @@ const SI_COLOR = {netflix:'#E50914',spotify:'#1DB954',youtube:'#FF2D2D',apple:'#
 const siSlug = d => { if (d in SI_SLUG) return SI_SLUG[d]; const p = d.split('.'); return (p.length > 2 ? p[p.length - 2] : p[0]).replace(/[^a-z0-9]/g, ''); };
 const LKEY = 'sologastos.logos'; let LC = {}; try { LC = JSON.parse(localStorage.getItem(LKEY)) || {}; } catch {}
 const memLogo = {}, pend = {};
-const probe = u => new Promise(res => { const i = new Image(), to = setTimeout(() => res(false), 6000); i.onload = () => { clearTimeout(to); res(true); }; i.onerror = () => { clearTimeout(to); res(false); }; i.src = u; });
+const probe = u => new Promise(res => { const i = new Image(), to = setTimeout(() => res(false), 5000); i.onload = () => { clearTimeout(to); res(true); }; i.onerror = () => { clearTimeout(to); res(false); }; i.src = u; });
 async function resolveLogo(d){
   if (LC[d]) return LC[d];
-  if (memLogo[d]) return memLogo[d];
+  if (memLogo[d] && Date.now() - memLogo[d].at < 60000) return memLogo[d];
   return pend[d] || (pend[d] = (async () => {
     const slug = siSlug(d);
     if (slug) try {
@@ -464,13 +465,15 @@ async function resolveLogo(d){
       if (m) { LC[d] = {t:'si', p:m[1], c:SI_COLOR[slug] || '#FFFFFF'}; }
     } catch {}
     if (!LC[d]) {
-      const ti = `https://${d}/apple-touch-icon.png`, fv = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(d)}&sz=128`;
-      if (await probe(ti)) LC[d] = {t:'ti', u:ti};
-      else if (await probe(fv)) LC[d] = {t:'fav', u:fv};
+      const bare = d.replace(/^www\./, '');
+      const ti = [`https://${bare}/apple-touch-icon.png`, `https://www.${bare}/apple-touch-icon.png`];
+      const fav = [`https://www.google.com/s2/favicons?domain=${encodeURIComponent(bare)}&sz=128`, `https://icons.duckduckgo.com/ip3/${bare}.ico`, `https://www.${bare}/favicon.ico`, `https://${bare}/favicon.ico`];
+      for (const u of ti) if (await probe(u)) { LC[d] = {t:'ti', u}; break; }
+      if (!LC[d]) for (const u of fav) if (await probe(u)) { LC[d] = {t:'fav', u}; break; }
     }
     delete pend[d];
     if (LC[d]) { try { localStorage.setItem(LKEY, JSON.stringify(LC)); } catch {} return LC[d]; }
-    return memLogo[d] = {t:'none'};
+    return memLogo[d] = {t:'none', at:Date.now()};
   })());
 }
 function paintLogo(el, L){
@@ -482,11 +485,14 @@ function paintLogo(el, L){
 function hydrateLogos(){
   document.querySelectorAll('.ico[data-d]:not([data-h])').forEach(async el => {
     el.dataset.h = 1;
-    const L = await resolveLogo(el.dataset.d);
-    if (L.t !== 'none' && el.isConnected) paintLogo(el, L);
+    try {
+      const L = await resolveLogo(el.dataset.d);
+      if (L.t !== 'none' && el.isConnected) paintLogo(el, L);
+    } catch { delete el.dataset.h; }
   });
 }
-new MutationObserver(() => { if (!hydrateLogos.q) hydrateLogos.q = requestAnimationFrame(() => { hydrateLogos.q = 0; hydrateLogos(); }); }).observe(document.body, {childList:true, subtree:true});
+new MutationObserver(() => { clearTimeout(hydrateLogos.t); hydrateLogos.t = setTimeout(hydrateLogos, 30); }).observe(document.body, {childList:true, subtree:true});
+document.addEventListener('visibilitychange', () => { if (!document.hidden) hydrateLogos(); });
 function icoHTML(e, c){
   const d = e.domain || guess(e.name);
   return `<span class="ico"${d ? ` data-d="${esc(d)}"` : ''}><svg viewBox="0 0 24 24">${ICONS[c.icon] || ICONS.dots}</svg></span>`;
@@ -1159,7 +1165,7 @@ function openForm(id, catPref, kindPref){
     <div class="field" id="f-buys-w" style="display:${f.mode === 'buys' ? '' : 'none'}"><label>Compras</label><div id="f-buys"></div>
       <div class="payadd"><input type="date" id="b-d" value="${iso(new Date())}"><input id="b-v" inputmode="decimal" placeholder="Importe" autocomplete="off"><button class="askbtn" id="b-add" aria-label="Apuntar compra"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>
     <div class="field" id="f-cat-w" style="display:${inc0 ? 'none' : ''}"><label>Categoría</label><div class="chips cats" id="f-cat">${S.cats.map(c => `<button data-v="${c.id}" style="--c:${c.color}" class="${f.cat === c.id ? 'on' : ''}"><i></i>${esc(c.name)}</button>`).join('')}</div></div>
-    <div class="field"><label>Web de la empresa (para el logo)</label><input id="f-domain" placeholder="Se detecta sola · ej. repsol.es" value="${esc(f.domain || '')}" autocapitalize="off" autocorrect="off" autocomplete="off"></div>
+    <div class="field"><label>Web de la empresa (para el logo)</label><input id="f-domain" placeholder="Se detecta sola · ej. repsol.es" value="${esc(f.domain || '')}" autocapitalize="off" autocorrect="off" autocomplete="off"><small class="hint" id="f-logo-hint"></small></div>
     <div class="field" id="f-next-w" style="display:${f.kind === 'variable' ? 'none' : ''}"><label id="f-next-l">${inc0 ? 'Próximo cobro' : 'Próximo pago o vencimiento'}</label><input type="date" id="f-next" value="${f.next}"></div>
     <div class="field" id="f-rem-w"><label>Avisarme antes</label>
       <select id="f-remind">${[[0,'No avisar'],[1,'1 día antes'],[3,'3 días antes'],[7,'1 semana antes'],[15,'15 días antes'],[30,'1 mes antes']].map(([v, l]) => `<option value="${v}" ${+f.remind === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
@@ -1179,6 +1185,11 @@ function openForm(id, catPref, kindPref){
     const logo = () => { clearTimeout(lt); lt = setTimeout(() => {
       const c = catNow(), w = $('#f-logo-w'); w.style.setProperty('--c', c.color);
       w.querySelector('.ico').outerHTML = icoHTML({name:$('#f-name').value, domain:cleanDomain($('#f-domain').value)}, c);
+      hydrateLogos();
+      const dd = cleanDomain($('#f-domain').value) || guess($('#f-name').value), hint = $('#f-logo-hint');
+      if (!dd) { hint.textContent = ''; return; }
+      hint.textContent = 'Buscando logo…';
+      resolveLogo(dd).then(L => { if (hint.isConnected) hint.textContent = L.t === 'none' ? 'No encuentro logo para esta web; se usa el icono de la categoría.' : 'Logo encontrado ✓'; });
     }, 350); };
     const applyKind = () => {
       const inc = f.kind === 'income';
@@ -1277,7 +1288,7 @@ function openSettings(){
     <button class="ghost" id="s-imp">Importar copia</button>
     <input type="file" id="s-file" accept="application/json" hidden>
     <button class="danger" id="s-clear">Borrar todo y empezar de cero</button>
-    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 21</p>`,
+    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 22</p>`,
   () => {
     $('#s-cats').onclick = openCats;
     $('#s-notif').onclick = async e => {

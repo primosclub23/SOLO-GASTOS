@@ -1,5 +1,5 @@
 // Cache mínima para que la app abra sin conexión. Subir VERSION al cambiar archivos.
-const VERSION = 'sg-v21';
+const VERSION = 'sg-v22';
 const SHELL = ['./', 'index.html', 'manifest.json', 'icon.svg', 'icon-192.png', 'icon-512.png', 'icon-180.png'];
 
 self.addEventListener('install', e => {
