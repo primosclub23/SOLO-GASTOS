@@ -22,7 +22,7 @@ sencillez y diseño.
 
 ```json
 { "expenses": [ { "id", "name", "cat", "amount", "freq": "week|month|bimonth|quarter|biannual|year",
-                  "variable": false, "payments": [{"m": "AAAA-MM", "v": 0}], "due": ["AAAA-MM"],
+                  "kind": "fixed|variable" (solo gastos), "inc": true (solo ingresos), "variable": false, "payments": [{"m": "AAAA-MM", "v": 0}], "due": ["AAAA-MM"],
                   "next": "AAAA-MM-DD|''", "remind": 0|1|3|7|15|30, "since": "AAAA-MM", "note" } ],
   "demo": false, "notif": false }
 ```
@@ -32,6 +32,14 @@ sencillez y diseño.
 - La gráfica mes a mes se **deriva** de `since` (no hay snapshots): un gasto cuenta desde su mes `since`. Por eso el formulario pide «Pagándolo desde».
 - Categorías editables, guardadas en `S.cats` (`{id,name,color,icon}`); `DEFAULT_CATS` solo siembra la primera vez. Al borrar una categoría, sus gastos pasan a «Otros» (o a la primera que quede). Siempre debe quedar al menos una.
 - `domain` (opcional) por gasto: web para el logo. Si está vacío se deduce del nombre con el diccionario `BRANDS` (`guess()`).
+
+## 3-bis. Navegación, tipos e ingresos (2026-10-18)
+
+- **Un solo array `S.expenses`**: los ingresos son entradas con `inc:true` y `cat:'__inc'` (`INC_CAT`); los gastos llevan `kind: 'fixed'|'variable'` (si falta, es fijo). Hay que filtrar siempre con `EXP()` / `INC()`; `total(kind)`, `incomeTotal()`, `catStats(kind)`.
+- **Dos ejes independientes:** `kind` (qué es: compromiso fijo o gasto del día a día; decide la pestaña) y `variable` (si el importe cambia cada vez; activa cobros y media). El agua, por ejemplo, es fijo con importe que cambia.
+- **Menú inferior (`#dock`)**: pastilla de cristal con 5 huecos (Inicio · Fijos · + · Variables · Ingresos) y una burbuja (`.bub`) que se desliza con `--i`. `view` es la pestaña activa; `setView()` re-renderiza con transición direccional (`.vin`). El «+» abre el formulario con el tipo de la pestaña actual (`addKind()`). Se oculta con `body.sheet-open`.
+- **Inicio** muestra «Ingresos», «Te quedan» (ingresos − gastos) y una barra con el % que se gasta; sin ingresos, una tarjeta invita a añadirlos.
+- El formulario tiene un selector Gasto fijo / Gasto variable / Ingreso; con Ingreso se oculta la categoría. Los gastos anteriores a este cambio se consideran fijos.
 
 ## 3a. Gastos variables
 
