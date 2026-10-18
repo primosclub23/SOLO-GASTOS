@@ -41,6 +41,10 @@ sencillez y diseño.
 - **Inicio** muestra «Ingresos», «Te quedan» (ingresos − gastos) y una barra con el % que se gasta; sin ingresos, una tarjeta invita a añadirlos.
 - El formulario tiene un selector Gasto fijo / Gasto variable / Ingreso; con Ingreso se oculta la categoría. Los gastos anteriores a este cambio se consideran fijos.
 
+## 3-ter. Búsqueda
+
+La lupa de la cabecera (`#btn-search`, `openSearch()`) busca por nombre, nota, web, categoría o tipo (`matchItems()`, ignora mayúsculas y acentos, todas las palabras deben aparecer). Los resultados (`searchHTML()`) dan «este mes», media y acumulado, un gráfico de barras y la lista mes a mes (`seriesFor(items)`, el mismo cálculo que el historial de Inicio, ahora compartido) y las coincidencias. Limitación: la app guarda un importe por mes y gasto (los cobros registrados), no tickets sueltos; los pagos anuales/trimestrales se reparten entre los meses.
+
 ## 3a. Gastos variables
 
 `variable: true` + `payments` (un cobro real por mes, ordenado). El importe que cuenta es la **media de los últimos 3 cobros** (`base()`/`monthly()`); sin cobros usa `amount` como estimación. Se eligen 3 y no «todos» para que reaccione pronto a cambios de tarifa.

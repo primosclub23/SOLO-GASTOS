@@ -308,6 +308,28 @@ input:focus,select:focus{border-color:rgba(99,242,195,.55)}
 .dnc{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none;gap:2px}
 .dnc b{font-size:25px;font-weight:700;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
 .dnc small{font-size:13px;color:var(--dim)}
+.searchbox{display:flex;align-items:center;gap:10px;margin-top:10px;padding:0 14px;border-radius:16px;background:var(--surface2);border:1px solid transparent}
+.searchbox:focus-within{border-color:rgba(107,240,143,.5)}
+.searchbox svg{flex:none;width:20px;height:20px;stroke:var(--dim);fill:none;stroke-width:2;stroke-linecap:round}
+.searchbox input{background:none;padding:15px 0;border-radius:0;border:0}
+.searchbox input:focus{border:0}
+.sres{margin-top:20px}
+.sstats{display:flex;gap:26px;margin-bottom:18px}
+.sstats small{display:block;font-size:11px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);margin-bottom:5px}
+.sstats b{font-size:21px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.sstats b i{font-style:normal;color:var(--dim);font-size:.75em;margin-left:2px}
+.sbars{display:flex;align-items:flex-end;gap:6px;height:100px;margin-top:4px}
+.sbars div{flex:1;height:100%;display:flex;align-items:flex-end}
+.sbars i{display:block;width:100%;border-radius:7px 7px 3px 3px;background:rgba(90,169,255,.55);transform-origin:bottom;animation:bup .8s var(--ease) backwards;animation-delay:calc(var(--i) * 45ms)}
+.sbars div.cur i{background:linear-gradient(180deg,#86f7a4,#52e07c)}
+@keyframes bup{from{transform:scaleY(0)}}
+.sbl{display:flex;gap:6px;margin-top:6px;font-size:10.5px;color:var(--dim);text-align:center;text-transform:capitalize}
+.sbl span{flex:1}
+.mrow{display:flex;justify-content:space-between;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.mrow span{color:var(--dim);text-transform:capitalize}
+.mrow b{font-weight:600}
+.snote{margin-top:12px;font-size:12px;line-height:1.5;color:var(--dim)}
+.slabel{margin:22px 0 10px;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -562,23 +584,24 @@ const EXP = () => S.expenses.filter(e => !e.inc);
 const INC = () => S.expenses.filter(e => e.inc);
 const total = kind => r2(EXP().filter(e => !kind || kindOf(e) === kind).reduce((a, e) => a + monthly(e), 0));
 const incomeTotal = () => r2(INC().reduce((a, e) => a + monthly(e), 0));
-function history(){
-  if (!EXP().length) return [];
-  const start = EXP().reduce((m, e) => (e.since || '0000') < m ? (e.since || '0000') : m, ym(new Date()));
+function seriesFor(items){
+  if (!items.length) return [];
+  const start = items.reduce((m, e) => (e.since || '0000') < m ? (e.since || '0000') : m, ym(new Date()));
   const out = [], now = new Date(); now.setDate(1);
   for (let i = 11; i >= 0; i--) {
     const d = new Date(now); d.setMonth(d.getMonth() - i);
     const k = ym(d);
     if (k < start) continue;
-    const v = r2(EXP().reduce((a, e) => {
+    const v = r2(items.reduce((a, e) => {
       if ((e.since || '0000') > k) return a;
       const p = e.variable && (e.payments || []).find(x => x.m === k);
       return a + (p ? p.v * FREQ[e.freq].m : monthly(e));
     }, 0));
-    out.push({k, label:MONTHS[d.getMonth()], v});
+    out.push({k, label:MONTHS[d.getMonth()], year:d.getFullYear(), v});
   }
   return out;
 }
+const history = () => seriesFor(EXP());
 const dueLabel = n => n === 0 ? 'Hoy' : n === 1 ? 'Mañana' : `En ${n} días`;
 
 /* ---------- render ---------- */
@@ -699,7 +722,7 @@ const addKind = () => view === 'income' ? 'income' : view === 'variable' ? 'vari
 function headerHTML(nn){
   return `<header class="top rise" style="--d:0">
     <div class="brand"><i></i>Solo Gastos</div>
-    <div class="topr"><button class="iconbtn bell${nn ? ' has' : ''}" id="btn-bell" aria-label="Notificaciones${nn ? ': ' + nn : ''}"><svg viewBox="0 0 24 24"><path class="f" d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9z"/><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>${nn ? `<i class="badge">${nn}</i>` : ''}</button>
+    <div class="topr"><button class="iconbtn" id="btn-search" aria-label="Buscar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button><button class="iconbtn bell${nn ? ' has' : ''}" id="btn-bell" aria-label="Notificaciones${nn ? ': ' + nn : ''}"><svg viewBox="0 0 24 24"><path class="f" d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9z"/><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>${nn ? `<i class="badge">${nn}</i>` : ''}</button>
     <button class="iconbtn" id="btn-set" aria-label="Ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
   </header>`;
 }
@@ -914,6 +937,59 @@ function mountSwipe(sh){
   });
 }
 
+function matchItems(q){
+  const words = norm(q).trim().split(' ').filter(Boolean);
+  if (!words.length) return [];
+  return S.expenses.filter(e => {
+    const hay = norm([e.name, e.note || '', e.domain || '', e.inc ? 'ingreso ingresos' : catOf(e.cat).name + ' ' + (kindOf(e) === 'fixed' ? 'fijo' : 'variable')].join(' '));
+    return words.every(w => hay.includes(w));
+  });
+}
+function searchHTML(q){
+  if (!q.trim()) {
+    const names = [...new Set([...S.expenses].sort((a, b) => monthly(b) - monthly(a)).map(e => e.name))].slice(0, 6);
+    const cats = catStats().slice(0, 3).map(x => x.c.name);
+    return `<p class="snote" style="margin-top:0">Busca un comercio (Mercadona), una categoría (Alimentación) o un concepto. Verás cuánto llevas cada mes.</p>
+      <div class="slabel">Prueba con</div><div class="chips">${[...cats, ...names].map(n => `<button data-q="${esc(n)}">${esc(n)}</button>`).join('')}</div>`;
+  }
+  const items = matchItems(q);
+  if (!items.length) return `<div class="empty">Sin resultados para «${esc(q.trim())}».<br>Prueba con otro nombre o con una categoría.</div>`;
+  const exp = items.filter(e => !e.inc), inc = items.filter(e => e.inc), main = exp.length ? exp : inc;
+  const ser = seriesFor(main), vals = ser.map(p => p.v), max = Math.max(...vals, 1);
+  const cur = ser[ser.length - 1], avg = vals.length ? r2(vals.reduce((a, b) => a + b, 0) / vals.length) : 0, sum = r2(vals.reduce((a, b) => a + b, 0));
+  const spread = main.some(e => e.freq !== 'month' && e.freq !== 'week');
+  return `
+    <div class="sstats">
+      <div><small>Este mes</small><b>${money(cur ? cur.v : 0)}<i>€</i></b></div>
+      <div><small>Media al mes</small><b>${money(avg)}<i>€</i></b></div>
+      <div><small>Acumulado</small><b>${money(sum)}<i>€</i></b></div>
+    </div>
+    ${ser.length > 1 ? `<div class="sbars">${ser.map((p, i) => `<div class="${i === ser.length - 1 ? 'cur' : ''}" title="${p.label} ${p.year}: ${money(p.v)} €"><i style="height:${Math.max(4, p.v / max * 100)}%;--i:${i}"></i></div>`).join('')}</div>
+    <div class="sbl">${ser.map(p => `<span>${p.label}</span>`).join('')}</div>` : ''}
+    <div class="slabel">${exp.length ? 'Mes a mes' : 'Mes a mes (ingresos)'}</div>
+    <div>${[...ser].reverse().map(p => `<div class="mrow"><span>${p.label} ${p.year}</span><b>${money(p.v)} €</b></div>`).join('')}</div>
+    <p class="snote">Cada mes usa el importe que registraste (en los que cambian) o el importe habitual.${spread ? ' Los pagos anuales o trimestrales se reparten entre los meses.' : ''}</p>
+    <div class="slabel">${items.length} ${items.length === 1 ? 'resultado' : 'resultados'}</div>
+    <div class="list">${items.map(e => { const c = catOf(e.cat); return `
+      <button class="row" data-edit="${e.id}" style="--c:${c.color}">
+        ${icoHTML(e, c)}
+        <span class="meta"><b>${esc(e.name)}</b><small>${e.inc ? 'Ingreso' : esc(c.name) + ' · ' + (kindOf(e) === 'fixed' ? 'Fijo' : 'Variable')}</small></span>
+        <span class="amt${e.inc ? ' good' : ''}">${e.variable ? '≈ ' : ''}${money(r2(monthly(e)))} €<small>al mes</small></span>
+      </button>`; }).join('')}</div>`;
+}
+function openSearch(){
+  openSheet(`<h2>Buscar</h2>
+    <div class="searchbox"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="Mercadona, Alimentación, luz…" autocomplete="off" autocapitalize="off" autocorrect="off" enterkeyhint="search"></div>
+    <div class="sres" id="qres">${searchHTML('')}</div>`,
+  sh => {
+    const q = $('#q'), res = $('#qres'); let t;
+    const draw = () => { res.innerHTML = searchHTML(q.value); };
+    q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(draw, 140); });
+    res.addEventListener('click', e => { const b = e.target.closest('[data-q]'); if (!b) return; q.value = b.dataset.q; draw(); });
+    setTimeout(() => q.focus(), 500);
+  });
+}
+
 function notifs(){
   return {
     asks:S.expenses.filter(needsPay),
@@ -1119,7 +1195,7 @@ function openSettings(){
     <button class="ghost" id="s-imp">Importar copia</button>
     <input type="file" id="s-file" accept="application/json" hidden>
     <button class="danger" id="s-clear">Borrar todo y empezar de cero</button>
-    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 18</p>`,
+    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 19</p>`,
   () => {
     $('#s-cats').onclick = openCats;
     $('#s-notif').onclick = async e => {
@@ -1183,8 +1259,9 @@ function checkReminders(){
 
 /* ---------- eventos ---------- */
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-view],#dock-add,[data-addkind],[data-dn],.dnwrap,#btn-donut,#tog-up,#btn-bell,[data-pay],[data-del],[data-ecat],[data-newcat],[data-edit],[data-cat],[data-add],#btn-set,#btn-clear,#btn-cats'); if (!t) return;
-  if (t.dataset.view) setView(t.dataset.view);
+  const t = e.target.closest('#btn-search,[data-view],#dock-add,[data-addkind],[data-dn],.dnwrap,#btn-donut,#tog-up,#btn-bell,[data-pay],[data-del],[data-ecat],[data-newcat],[data-edit],[data-cat],[data-add],#btn-set,#btn-clear,#btn-cats'); if (!t) return;
+  if (t.id === 'btn-search') openSearch();
+  else if (t.dataset.view) setView(t.dataset.view);
   else if (t.id === 'dock-add') openForm(null, null, addKind());
   else if (t.dataset.addkind) openForm(null, null, t.dataset.addkind);
   else if (t.dataset.dn) pickCat(t.dataset.dn);
