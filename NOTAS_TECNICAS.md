@@ -55,6 +55,14 @@ Tercer modo de «Importe» (además de *Siempre igual* y *Cambia cada cobro*): `
 - **Gastos de tipo variable** no tienen «Cada cuánto», «Próximo pago» ni «Avisarme antes»: al guardar se fuerzan `freq:'month'`, `next:''`, `remind:0`. Sus modos de importe son «Importe estimado» y «Varias compras»; los de tipo fijo/ingreso ofrecen «Siempre igual» y «Cambia cada cobro» (`modesFor()`).
 - En el formulario, «Compras» permite apuntar (fecha + importe) y borrar; en gastos existentes se guarda al instante, en gastos nuevos al pulsar Guardar.
 
+## 3-quinquies. «Tu mes» (resumen mensual compartible)
+
+Pantalla a pantalla completa (`#rcp`) que se abre desde la tarjeta «Tu mes» de Inicio (`#open-recap`). Muestra el mes anterior completo (o el último con datos) y permite navegar por los meses con datos (`recapMonths()`).
+- **Cálculo:** `aggMonth(k)` suma por gasto lo que cuenta en el mes `k` (compras sueltas, cobro registrado o importe habitual; los ingresos igual) y `recapData(k)` deriva total, variación frente al mes anterior, categoría top, lo que más pesó, el gasto con más compras, la categoría que más subió y cuánto sobró.
+- **Tarjetas:** `recapTiles()` elige las 4 más relevantes en orden de prioridad; `recapQuote()` genera la frase final.
+- **Imagen:** `drawRecap()` pinta en un `<canvas>` de 1080×1920 (formato historia) con el mismo diseño; se prepara como JPEG (`rcBlob`) al renderizar para que `navigator.share({files})` se invoque dentro del gesto del toque, con descarga como respaldo. «Sin cifras» sustituye los importes por `•••` y deja los porcentajes (útil para compartir sin enseñar dinero).
+- `scripts/mklogos.py` y `logos.js` no tienen relación; el pie de la imagen enlaza a la web de la app.
+
 ## 3a. Gastos variables
 
 `variable: true` + `payments` (un cobro real por mes, ordenado). El importe que cuenta es la **media de los últimos 3 cobros** (`base()`/`monthly()`); sin cobros usa `amount` como estimación. Se eligen 3 y no «todos» para que reaccione pronto a cambios de tarifa.
