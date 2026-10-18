@@ -45,6 +45,15 @@ sencillez y diseño.
 
 La lupa de la cabecera (`#btn-search`, `openSearch()`) busca por nombre, nota, web, categoría o tipo (`matchItems()`, ignora mayúsculas y acentos, todas las palabras deben aparecer). Los resultados (`searchHTML()`) dan «este mes», media y acumulado, un gráfico de barras y la lista mes a mes (`seriesFor(items)`, el mismo cálculo que el historial de Inicio, ahora compartido) y las coincidencias. Limitación: la app guarda un importe por mes y gasto (los cobros registrados), no tickets sueltos; los pagos anuales/trimestrales se reparten entre los meses.
 
+## 3-quater. Varias compras (2026-10-18)
+
+Tercer modo de «Importe» (además de *Siempre igual* y *Cambia cada cobro*): `buys:true` + `entries:[{id,d:'AAAA-MM-DD',v}]`. Sirve para supermercado, gasolina, etc., donde hay varias compras al mes.
+- `syncEntries(e)` recalcula `payments` (una suma por mes) a partir de las compras; así el historial, la búsqueda y las gráficas reutilizan lo existente. Se llama al cargar, importar y guardar.
+- `base(e)` = máx(media de los 3 últimos meses cerrados o la estimación, lo gastado en el mes en curso) (`buysBase`). Estos gastos no generan avisos de «¿cuánto cobraron?» y su frecuencia se fuerza a mensual.
+- Los meses sin compras cuentan 0 en historial y búsqueda.
+- La búsqueda muestra cada mes como `<details>` con las compras sueltas (fecha e importe) y una línea «Total» (`contribLines()`, `monthsHTML()`). El mes en curso va desplegado.
+- En el formulario, «Compras» permite apuntar (fecha + importe) y borrar; en gastos existentes se guarda al instante, en gastos nuevos al pulsar Guardar.
+
 ## 3a. Gastos variables
 
 `variable: true` + `payments` (un cobro real por mes, ordenado). El importe que cuenta es la **media de los últimos 3 cobros** (`base()`/`monthly()`); sin cobros usa `amount` como estimación. Se eligen 3 y no «todos» para que reaccione pronto a cambios de tarifa.
