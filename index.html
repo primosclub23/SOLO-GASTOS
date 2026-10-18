@@ -366,16 +366,25 @@ details.mdet[open] .bline,details.mdet[open] .mtot{animation:rise .4s var(--ease
 .rsec{margin-top:26px}
 .rleg{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font-size:13px;color:var(--dim)}
 .rleg i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:6px}
-.rtiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px}
-.rt{padding:16px;border-radius:24px;min-height:128px;display:flex;flex-direction:column;justify-content:space-between}
-.rt small{font-size:10.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
-.rt b{display:block;margin-top:8px;font-size:21px;font-weight:700;letter-spacing:-.03em;line-height:1.1;overflow-wrap:anywhere}
-.rt span{display:block;margin-top:6px;font-size:13px;color:var(--dim);font-variant-numeric:tabular-nums}
 .rquote{margin:26px 4px 0;font-size:23px;font-weight:650;letter-spacing:-.03em;line-height:1.25}
 .rbar{position:fixed;z-index:31;left:50%;translate:-50% 0;bottom:calc(env(safe-area-inset-bottom) + 18px);width:min(calc(100% - 28px),452px);display:flex;gap:10px}
 .rbar .primary{margin-top:0;flex:1;height:56px}
 .rchip{height:56px;padding:0 18px;border-radius:19px;background:rgba(40,43,50,.7);border:1px solid var(--line);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);font-weight:600;font-size:15px}
 .rchip.on{background:var(--text);color:#000}
+.rrank{display:flex;flex-direction:column;gap:16px}
+.rrow{display:flex;align-items:center;gap:12px}
+.rmid{flex:1;min-width:0}
+.rmid b{display:block;font-size:16px;font-weight:600}
+.rbar2{display:block;height:6px;border-radius:6px;background:rgba(255,255,255,.07);margin-top:9px;overflow:hidden}
+.rbar2 i{display:block;height:100%;width:var(--w);background:var(--c);border-radius:6px;transform-origin:left;animation:bgrow .9s var(--ease) backwards;animation-delay:calc(.55s + var(--n) * 80ms)}
+@keyframes bgrow{from{transform:scaleX(0)}}
+.rr{text-align:right;font-variant-numeric:tabular-nums}
+.rr b{display:block;font-size:17px;font-weight:650}
+.rr small{color:var(--dim);font-size:12px}
+.rline{display:flex;gap:12px;align-items:baseline;padding:12px 2px;border-bottom:1px solid var(--line)}
+.rline span{color:var(--dim);width:16px;font-variant-numeric:tabular-nums}
+.rline b{flex:1;font-weight:600}
+.rline em{font-style:normal;font-weight:600;font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -1112,30 +1121,20 @@ function defaultRecapK(){
 function recapData(k){
   const a = aggMonth(k), pk = prevYM(k), p = aggMonth(pk);
   const cats = Object.entries(a.byCat).map(([id, sum]) => ({c:catOf(id), sum})).sort((x, y) => y.sum - x.sum);
-  const big = [...a.lines].sort((x, y) => y.v - x.v)[0] || null;
+  const topLines = [...a.lines].sort((x, y) => y.v - x.v).slice(0, 3);
+  const big = topLines[0] || null;
   const buys = [...a.lines].filter(l => l.e.buys && l.n > 1).sort((x, y) => y.n - x.n || y.v - x.v)[0] || null;
   let risen = null;
   if (p.total) cats.forEach(c => { const d = r2(c.sum - (p.byCat[c.c.id] || 0)); if (d >= 10 && (!risen || d > risen.d)) risen = {name:c.c.name, d}; });
   const fixedSum = r2(a.lines.filter(l => kindOf(l.e) === 'fixed').reduce((s2, l) => s2 + l.v, 0));
   return {k, label:`${monthName(k)} ${k.slice(0, 4)}`, prevName:monthName(pk), total:a.total, prevTotal:p.total,
     delta:p.total ? Math.round((a.total - p.total) / p.total * 100) : null, income:a.income, left:r2(a.income - a.total),
-    cats, big, buys, risen, fixedPct:a.total ? Math.round(fixedSum / a.total * 100) : 0};
-}
-function recapTiles(R, hide){
-  const pct = v => R.total ? Math.round(v / R.total * 100) : 0, out = [];
-  if (R.big) out.push({label:'Lo que más pesó', value:R.big.e.name, sub:`${fmR(R.big.v, hide)} · ${pct(R.big.v)} % del mes`});
-  if (R.cats[0]) out.push({label:'Categoría top', value:R.cats[0].c.name, sub:`${fmR(R.cats[0].sum, hide)} · ${pct(R.cats[0].sum)} % del mes`, color:R.cats[0].c.color});
-  if (R.income > 0) out.push({label:R.left >= 0 ? 'Te sobró' : 'Te faltó', value:hide ? `${Math.round(Math.abs(R.left) / R.income * 100)} %` : fmR(Math.abs(R.left)), sub:hide ? 'de tus ingresos' : `de ${fmR(R.income)} ingresados`, color:R.left >= 0 ? '#6bf08f' : '#ff8a7a'});
-  if (R.buys) out.push({label:'Más compras', value:R.buys.e.name, sub:`${R.buys.n} compras · ${fmR(R.buys.v, hide)}`});
-  if (R.risen) out.push({label:'Lo que más subió', value:R.risen.name, sub:`+${fmR(R.risen.d, hide)} vs ${R.prevName}`, color:'#ff8a7a'});
-  out.push({label:'Fijos y variables', value:`${R.fixedPct} % fijos`, sub:`${100 - R.fixedPct} % variables`});
-  return out.slice(0, 4);
+    cats, big, topLines, buys, risen, fixedPct:a.total ? Math.round(fixedSum / a.total * 100) : 0};
 }
 function recapQuote(R, hide){
-  if (R.income > 0 && R.left >= 0) return hide ? `Te sobró el ${Math.round(R.left / R.income * 100)} % de lo que ingresaste.` : `Te sobraron ${fmR(R.left)}. ${R.delta !== null && R.delta < 0 ? 'Y gastaste menos que el mes pasado.' : 'Buen mes.'}`;
-  if (R.income > 0) return hide ? `Gastaste más de lo que ingresaste.` : `Gastaste ${fmR(-R.left)} más de lo que ingresaste.`;
-  if (R.delta === null) return 'Este fue tu primer mes registrado.';
-  return R.delta < 0 ? `Gastaste un ${-R.delta} % menos que en ${R.prevName}.` : R.delta > 0 ? `Gastaste un ${R.delta} % más que en ${R.prevName}.` : `Gastaste lo mismo que en ${R.prevName}.`;
+  const c = R.cats[0]; if (!c) return '';
+  const pct = R.total ? Math.round(c.sum / R.total * 100) : 0;
+  return `${c.c.name} se llevó el ${pct} % de tus gastos.`;
 }
 function recapCardHTML(){
   const k = rcK || defaultRecapK(); if (!k) return '';
@@ -1148,7 +1147,7 @@ const X_ICON = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>'
 function renderRecap(){
   const el = $('#rcp'), ms = recapMonths(), i = ms.indexOf(rcK);
   if (!ms.length || i < 0) { el.innerHTML = `<div class="rcpin"><div class="rtop"><button class="iconbtn" id="rc-close" aria-label="Cerrar">${X_ICON}</button></div><div class="card empty" style="margin-top:30px">Aún no hay datos para un resumen.<br>Añade tus gastos y vuelve a mirar.</div></div>`; return; }
-  const R = recapData(rcK), hide = rcHide, tiles = recapTiles(R, hide), tot = R.total;
+  const R = recapData(rcK), hide = rcHide, tot = R.total, top5 = R.cats.slice(0, 5), mx = Math.max(1, ...top5.map(x => x.sum));
   const arrow = R.delta > 0 ? 'M12 19V5M5 12l7-7 7 7' : 'M12 5v14M5 12l7 7 7-7';
   const pill = R.delta === null ? '' : R.delta === 0 ? `<span class="pill">Igual que en ${R.prevName}</span>`
     : `<span class="pill ${R.delta > 0 ? 'up' : 'down'}"><svg viewBox="0 0 24 24"><path d="${arrow}"/></svg>${Math.abs(R.delta)} % vs ${R.prevName}</span>`;
@@ -1158,10 +1157,14 @@ function renderRecap(){
       <span style="width:40px"></span></div>
     <div class="rhero rb" style="--k:0"><div class="eyebrow">Tu mes · gastaste</div>
       <div class="big"><span id="rc-n">${hide ? '•••' : heroHTML(0)}</span>${hide ? '' : '<span class="cur">€</span>'}</div>${pill}</div>
-    <div class="rsec rb" style="--k:1"><div class="stack">${R.cats.map((x, n) => `<i style="--c:${x.c.color};--w:${Math.max(x.sum, 1)};--i:${n}"></i>`).join('')}</div>
-      <div class="rleg">${R.cats.slice(0, 4).map(x => `<span style="--c:${x.c.color}"><i></i>${esc(x.c.name)} ${tot ? Math.round(x.sum / tot * 100) : 0} %</span>`).join('')}</div></div>
-    <div class="rtiles">${tiles.map((t, n) => `<div class="card rt rb" style="--k:${2 + n}"><div><small>${t.label}</small><b${t.color ? ` style="color:${t.color}"` : ''}>${esc(t.value)}</b></div><span>${esc(t.sub)}</span></div>`).join('')}</div>
-    <p class="rquote rb" style="--k:7">${esc(recapQuote(R, hide))}</p>
+    <div class="rsec rb" style="--k:1"><div class="stack">${R.cats.map((x, n) => `<i style="--c:${x.c.color};--w:${Math.max(x.sum, 1)};--i:${n}"></i>`).join('')}</div></div>
+    <div class="rsec rb" style="--k:2"><div class="slabel" style="margin-top:0">Dónde gastaste más</div>
+      <div class="rrank">${top5.map((x, n) => `<div class="rrow" style="--c:${x.c.color};--n:${n}"><span class="ico"><svg viewBox="0 0 24 24">${ICONS[x.c.icon]}</svg></span>
+        <div class="rmid"><b>${esc(x.c.name)}</b><span class="rbar2"><i style="--w:${(x.sum / mx * 100).toFixed(1)}%"></i></span></div>
+        <div class="rr"><b>${hide ? '•••' : money(x.sum) + ' €'}</b><small>${tot ? Math.round(x.sum / tot * 100) : 0} %</small></div></div>`).join('')}</div></div>
+    <div class="rsec rb" style="--k:3"><div class="slabel" style="margin-top:0">Lo que más pesó</div>
+      <div>${R.topLines.map((l, n) => `<div class="rline"><span>${n + 1}</span><b>${esc(l.e.name)}</b><em>${hide ? '•••' : money(l.v) + ' €'}</em></div>`).join('')}</div></div>
+    <p class="rquote rb" style="--k:4">${esc(recapQuote(R, hide))}</p>
     <div class="rbar"><button class="primary" id="rc-share">Compartir imagen</button><button class="rchip${hide ? ' on' : ''}" id="rc-hide">Sin cifras</button></div>
   </div>`;
   const st = el.querySelector('.stack'); st.classList.add('pre'); requestAnimationFrame(() => requestAnimationFrame(() => st.classList.remove('pre')));
@@ -1216,26 +1219,34 @@ function drawRecap(R, hide){
     x.fillStyle = 'rgba(255,255,255,.09)'; rr(90, 572, tw + 64, 70, 35); x.fill();
     x.fillStyle = R.delta > 0 ? '#ff8a7a' : R.delta < 0 ? '#63f2c3' : '#f5f5f7'; x.fillText(txt, 122, 619);
   }
-  // reparto por categorías
+  // reparto por categorías (barra fina)
   let cx = 90; const BW = 900, GAP = 6, cats = R.cats.slice(0, 8), sum = cats.reduce((a, c) => a + c.sum, 0) || 1, usable = BW - GAP * (cats.length - 1);
-  cats.forEach(c => { const cw = Math.max(10, c.sum / sum * usable); x.fillStyle = c.c.color; rr(cx, 726, cw, 30, 6); x.fill(); cx += cw + GAP; });
-  x.font = `500 28px ${F}`; let lx = 90;
-  for (const c of R.cats.slice(0, 4)) { const t = `${c.c.name} ${R.total ? Math.round(c.sum / R.total * 100) : 0} %`, tw3 = 26 + x.measureText(t).width; if (lx + tw3 > 990) break; x.fillStyle = c.c.color; x.beginPath(); x.arc(lx + 8, 806, 8, 0, 7); x.fill(); x.fillStyle = '#8e8e93'; x.fillText(t, lx + 26, 816); lx += tw3 + 30; }
-  // tarjetas
-  const tiles = recapTiles(R, hide), tw2 = 435, th = 300, pos = [[90, 890], [555, 890], [90, 1220], [555, 1220]];
-  tiles.forEach((t, n) => {
-    const [tx, ty] = pos[n];
-    x.fillStyle = 'rgba(255,255,255,.06)'; rr(tx, ty, tw2, th, 46); x.fill(); x.strokeStyle = 'rgba(255,255,255,.13)'; x.lineWidth = 2; x.stroke();
-    x.fillStyle = '#8e8e93'; x.font = `600 25px ${F}`; spaced(t.label.toUpperCase(), tx + 38, ty + 72, 3.5);
-    x.fillStyle = t.color || '#f5f5f7'; x.font = `700 54px ${F}`; x.fillText(fit(t.value, tw2 - 76), tx + 38, ty + 160);
-    x.fillStyle = '#8e8e93'; x.font = `500 30px ${F}`; x.fillText(fit(t.sub, tw2 - 76), tx + 38, ty + 246);
+  cats.forEach(c => { const cw = Math.max(10, c.sum / sum * usable); x.fillStyle = c.c.color; rr(cx, 706, cw, 26, 6); x.fill(); cx += cw + GAP; });
+  // dónde gastaste más
+  x.fillStyle = '#8e8e93'; x.font = `600 26px ${F}`; spaced('DÓNDE GASTASTE MÁS', 90, 820, 4);
+  const top5 = R.cats.slice(0, 5), mx = Math.max(1, ...top5.map(c => c.sum));
+  top5.forEach((c, n) => {
+    const y = 856 + n * 112;
+    x.fillStyle = '#f5f5f7'; x.font = `650 46px ${F}`; x.fillText(fit(c.c.name, 520), 90, y + 44);
+    x.textAlign = 'right'; x.font = `700 46px ${F}`; x.fillText(hide ? '•••' : money(c.sum) + ' €', 990, y + 44);
+    x.fillStyle = '#8e8e93'; x.font = `500 28px ${F}`; x.fillText(`${R.total ? Math.round(c.sum / R.total * 100) : 0} %`, 990, y + 84); x.textAlign = 'left';
+    x.fillStyle = 'rgba(255,255,255,.08)'; rr(90, y + 62, 760, 16, 8); x.fill();
+    x.fillStyle = c.c.color; rr(90, y + 62, Math.max(16, c.sum / mx * 760), 16, 8); x.fill();
+  });
+  // lo que más pesó
+  x.fillStyle = '#8e8e93'; x.font = `600 26px ${F}`; spaced('LO QUE MÁS PESÓ', 90, 1470, 4);
+  R.topLines.forEach((l, n) => {
+    const y = 1526 + n * 62;
+    x.fillStyle = '#8e8e93'; x.font = `500 32px ${F}`; x.fillText(String(n + 1), 90, y);
+    x.fillStyle = '#f5f5f7'; x.font = `600 36px ${F}`; x.fillText(fit(l.e.name, 560), 140, y);
+    x.textAlign = 'right'; x.font = `650 36px ${F}`; x.fillText(hide ? '•••' : money(l.v) + ' €', 990, y); x.textAlign = 'left';
   });
   // frase
-  x.fillStyle = '#f5f5f7'; x.font = `650 54px ${F}`;
-  wrap(recapQuote(R, hide), 900).slice(0, 3).forEach((l, n) => x.fillText(l, 90, 1640 + n * 68));
+  x.fillStyle = '#f5f5f7'; x.font = `650 46px ${F}`;
+  wrap(recapQuote(R, hide), 900).slice(0, 2).forEach((l, n) => x.fillText(l, 90, 1752 + n * 56));
   // pie
-  x.textAlign = 'center'; x.fillStyle = '#8e8e93'; x.font = `500 30px ${F}`; x.fillText('Hecho con Solo Gastos', W / 2, 1830);
-  x.fillStyle = '#5c5c61'; x.font = `500 26px ${F}`; x.fillText('primosclub23.github.io/SOLO-GASTOS', W / 2, 1876); x.textAlign = 'left';
+  x.textAlign = 'center'; x.fillStyle = '#8e8e93'; x.font = `500 30px ${F}`; x.fillText('Hecho con Solo Gastos', W / 2, 1866);
+  x.fillStyle = '#5c5c61'; x.font = `500 26px ${F}`; x.fillText('primosclub23.github.io/SOLO-GASTOS', W / 2, 1902); x.textAlign = 'left';
   return cv;
 }
 function shareRecap(){
@@ -1489,7 +1500,7 @@ function openSettings(){
     <button class="ghost" id="s-imp">Importar copia</button>
     <input type="file" id="s-file" accept="application/json" hidden>
     <button class="danger" id="s-clear">Borrar todo y empezar de cero</button>
-    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 25</p>`,
+    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 26</p>`,
   () => {
     $('#s-cats').onclick = openCats;
     $('#s-notif').onclick = async e => {
