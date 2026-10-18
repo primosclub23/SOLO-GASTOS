@@ -52,6 +52,7 @@ Tercer modo de «Importe» (además de *Siempre igual* y *Cambia cada cobro*): `
 - `base(e)` = máx(media de los 3 últimos meses cerrados o la estimación, lo gastado en el mes en curso) (`buysBase`). Estos gastos no generan avisos de «¿cuánto cobraron?» y su frecuencia se fuerza a mensual.
 - Los meses sin compras cuentan 0 en historial y búsqueda.
 - La búsqueda muestra cada mes como `<details>` con las compras sueltas (fecha e importe) y una línea «Total» (`contribLines()`, `monthsHTML()`). El mes en curso va desplegado.
+- **Gastos de tipo variable** no tienen «Cada cuánto», «Próximo pago» ni «Avisarme antes»: al guardar se fuerzan `freq:'month'`, `next:''`, `remind:0`. Sus modos de importe son «Importe estimado» y «Varias compras»; los de tipo fijo/ingreso ofrecen «Siempre igual» y «Cambia cada cobro» (`modesFor()`).
 - En el formulario, «Compras» permite apuntar (fecha + importe) y borrar; en gastos existentes se guarda al instante, en gastos nuevos al pulsar Guardar.
 
 ## 3a. Gastos variables
