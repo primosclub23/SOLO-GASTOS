@@ -1180,7 +1180,7 @@ function openForm(id, catPref, kindPref){
     const amt = $('#f-amount'), num = () => parseFloat(String(amt.value).replace(',', '.'));
     const eq = () => {
       const a = num(), mo = a > 0 ? r2(monthly({variable:f.variable, buys:f.buys, amount:a, freq:f.freq, payments:(ex && ex.payments) || []})) : 0;
-      $('#f-equiv').innerHTML = a > 0
+      $('#f-equiv').innerHTML = (a > 0 && f.kind !== 'variable')
         ? (f.variable ? `Cuenta como <b>≈ ${money(mo)} €/mes</b> · ${ex ? 'media de tus últimos importes' : 'se guarda como tu último importe'}` : `= <b>${money(mo)} €/mes</b> · ${money(r2(mo * 12))} €/año`) : '';
       $('#f-rem-w').style.display = (f.kind !== 'variable' && $('#f-next').value) ? '' : 'none';
     };
@@ -1291,7 +1291,7 @@ function openSettings(){
     <button class="ghost" id="s-imp">Importar copia</button>
     <input type="file" id="s-file" accept="application/json" hidden>
     <button class="danger" id="s-clear">Borrar todo y empezar de cero</button>
-    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 23</p>`,
+    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 24</p>`,
   () => {
     $('#s-cats').onclick = openCats;
     $('#s-notif').onclick = async e => {
