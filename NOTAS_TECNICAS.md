@@ -70,8 +70,9 @@ Cada gasto tiene un dominio (`domain`, o deducido del nombre con `BRANDS`/`guess
 
 1. **Simple Icons** (jsDelivr, `simple-icons@13.21.0`): logo vectorial inline, en el color de marca de `SI_COLOR` (blanco si no está), grande sobre baldosa negra.
 2. **`/apple-touch-icon.png`** de la propia web: icono a sangre completa.
-3. **Favicon**, probando en orden Google (`s2/favicons`), DuckDuckGo (`icons.duckduckgo.com/ip3`) y `/favicon.ico` de la propia web (con y sin `www`): sobre baldosa negra, con margen.
-4. Si nada carga, se queda el icono duotono de la categoría.
+3. **Logos incrustados** (`logos.js`, `window.LOGOS`, ~48 marcas españolas y comunes, ≤64 px, generados con `scripts/mklogos.py` a partir de `BRANDS`): se usan sin red.
+4. **Favicon**, probando en orden Google (`s2/favicons`), DuckDuckGo (`icons.duckduckgo.com/ip3`) y `/favicon.ico` de la propia web (con y sin `www`): sobre baldosa negra, con margen.
+5. Si nada carga, se queda el icono duotono de la categoría.
 
 `hydrateLogos()` (con `MutationObserver`) pinta los logos en cualquier `.ico[data-d]` nuevo.
 **Privacidad:** el navegador pide a jsDelivr, a la web de la empresa y/o a Google el dominio de la empresa (nunca importes ni datos del usuario).
@@ -117,6 +118,8 @@ Al subir cambios, subir `VERSION` en `sw.js`.
 - **Exportar en iPhone (2026-10-17):** una descarga con `<a download>` abre un visor sin forma obvia de guardar. Ahora se usa `navigator.share({files})` (hoja de compartir → «Guardar en Archivos»), con la descarga clásica como respaldo en ordenador.
 
 - **Logos que no salían (2026-10-18):** la hidratación de logos (`MutationObserver` → `requestAnimationFrame`) se quedaba bloqueada para siempre si el navegador pausaba el frame (app en segundo plano), y los fallos de red se recordaban toda la sesión. Ahora usa `setTimeout`, reintenta a los 60 s, se relanza al volver a primer plano y el formulario muestra «Logo encontrado ✓» o «No encuentro logo…».
+
+- **Logos con imagen invisibles desde la v13 (2026-10-18):** la clase `ok` que ponía a la `<img>` al cargar chocaba con `.ok` de la animación de guardado (`position:fixed; opacity:0…`), así que todo logo basado en `<img>` (Repsol, Mercadona…) se quedaba invisible; los de Simple Icons (SVG en línea) no. Ahora la clase es `ld`. **Evitar nombres de clase genéricos (`ok`, `show`, `on`) sin prefijo.** El service worker tampoco intercepta ya peticiones de otros orígenes.
 
 ## 7. Pendiente / ideas
 
