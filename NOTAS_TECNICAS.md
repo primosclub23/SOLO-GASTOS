@@ -107,6 +107,10 @@ Los iconos de categoría (y el de reserva cuando no hay favicon) son SVG **duoto
 
 En «Por categorías», el botón de gráfico (`#btn-donut`) alterna la barra apilada y un donut SVG (`chartHTML()`, `toggleChart()`); la elección se guarda en `sologastos.ui` (`donut`). Cada segmento es un `<circle>` con `stroke-dasharray`/`dashoffset` calculados con la circunferencia (`DN_C`) y se dibuja en cascada con una transición; tocar un segmento (`pickCat()`) lo resalta y muestra categoría, importe y % en el centro; tocar el hueco vuelve al total.
 
+## 3g. Icono de la app
+
+Icono del zorro (2026-10-20), a partir de la imagen que aportó el usuario (sin el texto «Grok Bot»): se recortó el zorro por luminancia y se recompuso sobre un fondo oscuro a sangre (sin esquinas redondeadas, iOS aplica la máscara) con una sombra suave; el zorro ocupa ~60 % del lado. Archivos: `icon-512.png` (manifiesto, «any maskable»), `icon-192.png` (manifiesto y favicon) e `icon-180.png` (`apple-touch-icon`). Se eliminó `icon.svg`. Si se cambia el icono, subir `VERSION` en `sw.js` y, en iOS, borrar y volver a añadir la app a la pantalla de inicio (iOS guarda el icono al instalarla).
+
 ## 4. Avisos
 
 Notification API, comprobación **al abrir la app** (y al volver a primer plano). Un aviso por gasto y vencimiento (`sologastos.notified`).
