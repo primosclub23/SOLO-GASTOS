@@ -39,8 +39,6 @@ svg{display:block}
 .app{position:relative;z-index:1;max-width:480px;margin:0 auto;
   padding:calc(env(safe-area-inset-top) + 14px) 20px calc(env(safe-area-inset-bottom) + 150px)}
 .top{display:flex;align-items:center;justify-content:space-between;height:44px}
-.brand{display:flex;align-items:center;gap:9px;font-weight:600;font-size:15px;letter-spacing:.01em}
-.brand i{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--mint),var(--blue));animation:glow 3s ease-in-out infinite}
 @keyframes glow{0%,100%{box-shadow:0 0 8px rgba(99,242,195,.5)}50%{box-shadow:0 0 20px rgba(99,242,195,.95)}}
 .iconbtn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line)}
 .iconbtn svg{width:19px;height:19px;stroke:var(--text);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -244,7 +242,9 @@ input:focus,select:focus{border-color:rgba(99,242,195,.55)}
 .payadd{display:flex;gap:8px;margin-top:12px;align-items:center}
 .payadd input[type=month]{flex:1.8;min-width:0;font-size:15px}
 .payadd input:not([type=month]){flex:1;min-width:0}
-.topr{display:flex;gap:10px}
+.topr{display:flex;gap:10px;margin-left:auto;align-items:center}
+.mespill{height:40px;padding:0 15px 0 12px;border-radius:20px;display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:#04110d;background:linear-gradient(135deg,#86f7a4,#52e07c)}
+.mespill svg{width:17px;height:17px;stroke:#04110d;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .bell{position:relative}
 .bell .badge{position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--up);color:#1a0604;font:700 11px/18px -apple-system,system-ui,sans-serif;font-style:normal;text-align:center;box-shadow:0 0 0 2px var(--bg);animation:pop .6s 1.2s var(--spring) backwards}
 .bell.has svg{animation:ring 1.4s 1.6s var(--ease) 1;transform-origin:50% 8%}
@@ -341,14 +341,6 @@ details.mdet[open]>summary span::after{transform:translateY(0) rotate(225deg)}
 .mtot b{font-size:17px}
 details.mdet[open] .bline,details.mdet[open] .mtot{animation:rise .4s var(--ease) backwards}
 .hint{display:block;margin-top:7px;font-size:12px;color:var(--dim);min-height:15px}
-.rcard{display:flex;align-items:center;gap:14px;width:100%;margin-top:12px;padding:16px 18px;border-radius:24px;text-align:left;position:relative;overflow:hidden}
-.rcard::after{content:"";position:absolute;right:-50px;top:-50px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(107,240,143,.22),transparent 70%);pointer-events:none}
-.rcard .rl{flex:1;min-width:0}
-.rcard .rl small{display:block;font-size:11px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
-.rcard .rl b{display:block;margin-top:3px;font-size:19px;font-weight:700;letter-spacing:-.025em}
-.rcard .rpv{font-size:13px;color:var(--dim);font-variant-numeric:tabular-nums;text-align:right;position:relative;z-index:1}
-.rcard .go{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#86f7a4,#52e07c);display:grid;place-items:center;flex:none;position:relative;z-index:1}
-.rcard .go svg{width:16px;height:16px;stroke:#04110d;stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .rcp{position:fixed;inset:0;z-index:30;background:#050607;overflow-y:auto;overscroll-behavior:contain;transform:translateY(102%);transition:transform .65s var(--spring),visibility 0s .65s;visibility:hidden}
 .rcp.open{transform:none;visibility:visible;transition:transform .65s var(--spring)}
 .rcp::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(70% 40% at 90% 0%,rgba(90,169,255,.26),transparent 70%),radial-gradient(60% 35% at 0% 42%,rgba(99,242,195,.14),transparent 70%)}
@@ -802,8 +794,7 @@ const addKind = () => view === 'income' ? 'income' : view === 'variable' ? 'vari
 
 function headerHTML(nn){
   return `<header class="top rise" style="--d:0">
-    <div class="brand"><i></i>Solo Gastos</div>
-    <div class="topr"><button class="iconbtn" id="btn-search" aria-label="Buscar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button><button class="iconbtn bell${nn ? ' has' : ''}" id="btn-bell" aria-label="Notificaciones${nn ? ': ' + nn : ''}"><svg viewBox="0 0 24 24"><path class="f" d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9z"/><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>${nn ? `<i class="badge">${nn}</i>` : ''}</button>
+    <div class="topr">${EXP().length && defaultRecapK() ? '<button class="mespill" id="open-recap" aria-label="Tu mes"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Tu mes</button>' : ''}<button class="iconbtn" id="btn-search" aria-label="Buscar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button><button class="iconbtn bell${nn ? ' has' : ''}" id="btn-bell" aria-label="Notificaciones${nn ? ': ' + nn : ''}"><svg viewBox="0 0 24 24"><path class="f" d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9z"/><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>${nn ? `<i class="badge">${nn}</i>` : ''}</button>
     <button class="iconbtn" id="btn-set" aria-label="Ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
   </header>`;
 }
@@ -868,7 +859,6 @@ function render(){
       <div class="sparkcap"><span id="cap-l">${first.label}</span><span id="cap-r"><b>${money(lastp.v)} €</b> · ${lastp.label}</span></div>`
       : `<div class="empty" style="padding:18px 0 22px;font-size:13px">${EXP().length ? 'La gráfica aparecerá cuando haya al menos dos meses de datos. Si ya pagabas algo antes, indícalo en «Pagándolo desde».' : ''}</div>`)}
   ${bal}
-  ${EXP().length && defaultRecapK() ? recapCardHTML() : ''}
   ${up.length ? `
   <section class="sec rise" style="--d:3">
     <button class="sechead tog" id="tog-up" aria-expanded="${upOpen}" aria-controls="fold-up">
@@ -1135,13 +1125,6 @@ function recapQuote(R, hide){
   const c = R.cats[0]; if (!c) return '';
   const pct = R.total ? Math.round(c.sum / R.total * 100) : 0;
   return `${c.c.name} se llevó el ${pct} % de tus gastos.`;
-}
-function recapCardHTML(){
-  const k = rcK || defaultRecapK(); if (!k) return '';
-  const R = recapData(k);
-  return `<button class="card rcard rise" id="open-recap" style="--d:3"><span class="rl"><small>Tu mes</small><b>${cap(monthName(k))} ${k.slice(0, 4)}</b></span>
-    <span class="rpv">${money(R.total)} €${R.delta ? ' · ' + (R.delta > 0 ? '↑ ' : '↓ ') + Math.abs(R.delta) + ' %' : ''}</span>
-    <span class="go"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></button>`;
 }
 const X_ICON = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 function renderRecap(){
@@ -1500,7 +1483,7 @@ function openSettings(){
     <button class="ghost" id="s-imp">Importar copia</button>
     <input type="file" id="s-file" accept="application/json" hidden>
     <button class="danger" id="s-clear">Borrar todo y empezar de cero</button>
-    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 26</p>`,
+    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 27</p>`,
   () => {
     $('#s-cats').onclick = openCats;
     $('#s-notif').onclick = async e => {

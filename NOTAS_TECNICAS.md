@@ -57,7 +57,7 @@ Tercer modo de «Importe» (además de *Siempre igual* y *Cambia cada cobro*): `
 
 ## 3-quinquies. «Tu mes» (resumen mensual compartible)
 
-Pantalla a pantalla completa (`#rcp`) que se abre desde la tarjeta «Tu mes» de Inicio (`#open-recap`). Muestra el mes anterior completo (o el último con datos) y permite navegar por los meses con datos (`recapMonths()`).
+Pantalla a pantalla completa (`#rcp`) que se abre desde el botón verde «Tu mes» de la cabecera, junto a la lupa (`#open-recap`, 2026-10-20; antes era una tarjeta en Inicio y la cabecera llevaba la marca «Solo Gastos» con el punto azul, ambas eliminadas). Muestra el mes anterior completo (o el último con datos) y permite navegar por los meses con datos (`recapMonths()`).
 - **Cálculo:** `aggMonth(k)` suma por gasto lo que cuenta en el mes `k` (compras sueltas, cobro registrado o importe habitual; los ingresos igual) y `recapData(k)` deriva total, variación frente al mes anterior, ranking de categorías y los 3 gastos que más pesaron (también calcula compras y ahorro, hoy sin usar en pantalla).
 - **Contenido (decidido el 2026-10-18):** el resumen se centra en el total gastado y **dónde se gastó más**: cifra grande + variación, barra de reparto, ranking de las 5 categorías con importe, % y barra animada, los 3 gastos que más pesaron y una frase final (`recapQuote()`). Se quitaron las tarjetas de «te sobró», «más compras», etc.
 - **Imagen:** `drawRecap()` pinta en un `<canvas>` de 1080×1920 (formato historia) con el mismo diseño; se prepara como JPEG (`rcBlob`) al renderizar para que `navigator.share({files})` se invoque dentro del gesto del toque, con descarga como respaldo. «Sin cifras» sustituye los importes por `•••` y deja los porcentajes (útil para compartir sin enseñar dinero).
