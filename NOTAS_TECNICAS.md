@@ -111,6 +111,12 @@ En «Por categorías», el botón de gráfico (`#btn-donut`) alterna la barra ap
 
 Icono del zorro (2026-10-20), a partir de la imagen que aportó el usuario (sin el texto «Grok Bot»): se recortó el zorro por luminancia y se recompuso sobre un fondo oscuro a sangre (sin esquinas redondeadas, iOS aplica la máscara) con una sombra suave; el zorro ocupa ~60 % del lado. Archivos: `icon-512.png` (manifiesto, «any maskable»), `icon-192.png` (manifiesto y favicon) e `icon-180.png` (`apple-touch-icon`). Se eliminó `icon.svg`. Si se cambia el icono, subir `VERSION` en `sw.js` y, en iOS, borrar y volver a añadir la app a la pantalla de inicio (iOS guarda el icono al instalarla).
 
+## 3h. Foto propia y recordatorio de copia (2026-11-03)
+
+- **Foto propia:** en el formulario, tocar el icono abre la fototeca (`#f-photo`). Se recorta cuadrada a 160 px y se guarda como JPEG en `img` (data URL) dentro del gasto; `icoHTML()` la usa antes que el logo web. «Quitar» (`#f-photo-x`) la borra.
+- **Recordatorio de copia:** `backupDue()` avisa 7 días después de empezar a usar la app (`bk0` en `sologastos.ui`) y luego cada 14 desde la última copia (`bk`, se anota al exportar con `exportBackup()`). Sale en la campanilla (suma 1 al badge) con botón «Hacer copia ahora» y una (i) que explica que los datos no pasan por terceros; también como notificación del sistema si los avisos están activos. Ajustes muestra «Última copia: …».
+- Decisión: de momento la copia es manual (hoja de compartir); la copia automática a un repo privado con token queda para si la app la usan más personas.
+
 ## 4. Avisos
 
 Notification API, comprobación **al abrir la app** (y al volver a primer plano). Un aviso por gasto y vencimiento (`sologastos.notified`).

@@ -214,6 +214,9 @@ input:focus,select:focus{border-color:rgba(99,242,195,.55)}
 .ico .lg{position:absolute;inset:0;display:grid;place-items:center;animation:fade .5s both}
 .ico .lg svg{width:66%;height:66%;fill:var(--lc,#fff);stroke:none;filter:drop-shadow(0 0 7px color-mix(in srgb,var(--lc,#fff) 55%,transparent))}
 .namerow .ico{cursor:pointer}
+.infob{display:inline-grid;place-items:center;width:18px;height:18px;margin-left:6px;border-radius:50%;border:1.5px solid currentColor;background:none;color:var(--mut,#8e8e93);font:700 11px/1 Georgia,serif;font-style:italic;vertical-align:middle;padding:0;cursor:pointer}
+.infot{display:none;margin:8px 0 0;font-size:12.5px;line-height:1.45;color:var(--mut,#8e8e93)}
+.infot.open{display:block}
 .ico img{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .35s}
 .ico img.ld{opacity:1}
 .ico img.full{object-fit:cover}
@@ -830,7 +833,7 @@ function catSection(list, t, kind){
 }
 
 function render(){
-  const nf = notifs(), nn = nf.asks.length + nf.soon.length;
+  const nf = notifs(), nn = nf.asks.length + nf.soon.length + (backupDue() ? 1 : 0);
   let body = '', t = 0, h = [];
   if (view === 'home') {
     t = total(); h = history();
@@ -1248,10 +1251,11 @@ function notifs(){
   };
 }
 function openBell(){
-  const {asks, soon} = notifs();
+  const {asks, soon} = notifs(), bk = backupDue();
   openSheet(`
     <h2>Notificaciones</h2>
-    <p class="lead">${asks.length + soon.length ? 'Lo que necesita tu atención.' : 'Todo al día.'}</p>
+    <p class="lead">${asks.length + soon.length + (bk ? 1 : 0) ? 'Lo que necesita tu atención.' : 'Todo al día.'}</p>
+    ${bk ? `<div class="field"><label>Copia de seguridad<button type="button" class="infob" aria-label="Más información" onclick="this.parentNode.nextElementSibling.classList.toggle('open')">i</button></label><div class="infot">Esta copia se hace para que tus datos estén siempre seguros y bajo tu control: Solo Gastos no los envía a servidores ni a proveedores de terceros, se quedan en tu móvil y tú decides dónde guardar la copia.</div><div class="empty" style="text-align:left;padding:14px 16px">${backupText().replace('Aún no has hecho ninguna copia.', 'Todavía no has hecho ninguna copia.')} Tus datos solo están en este móvil; guarda una copia en Archivos por si lo pierdes.<br><button class="ghost" id="bk-now" style="margin-top:10px">Hacer copia ahora</button></div></div>` : ''}
     ${asks.length ? `<div class="field"><label>Cobros por actualizar</label><div class="list">${asks.map(e => { const c = catOf(e.cat); return `
       <div class="row ask" style="--c:${c.color}">
         ${icoHTML(e, c)}
@@ -1264,7 +1268,7 @@ function openBell(){
         ${icoHTML(e, c)}
         <span class="meta"><b>${esc(e.name)}</b><small>${shortDate(e.next)} · ${e.variable ? '≈ ' : ''}${money(base(e))} €</small></span>
         <span class="when ${n <= 3 ? 'now' : 'soon'}">${dueLabel(n)}</span></button>`; }).join('')}</div></div>` : ''}
-    ${asks.length + soon.length ? '' : '<div class="empty">No tienes nada pendiente.<br>Aquí aparecerán los cobros variables por registrar y los vencimientos que se acercan.</div>'}`);
+    ${asks.length + soon.length + (bk ? 1 : 0) ? '' : '<div class="empty">No tienes nada pendiente.<br>Aquí aparecerán los cobros variables por registrar y los vencimientos que se acercan.</div>'}`, () => { const b = $('#bk-now'); if (b) b.onclick = exportBackup; });
 }
 
 function openCat(id, kind){
@@ -1488,6 +1492,32 @@ function openForm(id, catPref, kindPref){
   });
 }
 
+/* ---------- recordatorio de copia de seguridad ---------- */
+const BK_FIRST = 7, BK_EVERY = 14; // días: primer aviso tras empezar a usar la app, y luego cada cuánto
+const daysSince = k => Math.floor((Date.now() - parse(k).getTime()) / 864e5);
+function backupDue(){
+  if (!S.expenses.length || S.demo) return false;
+  const last = getUI('bk');
+  if (last) return daysSince(last) >= BK_EVERY;
+  let first = getUI('bk0'); if (!first) { first = iso(new Date()); setUI('bk0', first); }
+  return daysSince(first) >= BK_FIRST;
+}
+function backupText(){
+  const last = getUI('bk'); if (!last) return 'Aún no has hecho ninguna copia.';
+  const n = daysSince(last); return 'Última copia: ' + (n <= 0 ? 'hoy' : n === 1 ? 'ayer' : `hace ${n} días`) + '.';
+}
+function exportBackup(){
+  const name = `solo-gastos-${iso(new Date())}.json`, json = JSON.stringify(S, null, 2), done = () => { setUI('bk', iso(new Date())); render(); const t = $('#s-bk'); if (t) t.textContent = backupText(); };
+  const file = new File([json], name, {type:'application/json'});
+  // En el móvil se abre la hoja de compartir (Guardar en Archivos, AirDrop, Mensajes…); si no existe, descarga normal.
+  if (navigator.canShare && navigator.canShare({files:[file]})) {
+    navigator.share({files:[file], title:'Copia de Solo Gastos'}).then(done).catch(e => { if (e.name !== 'AbortError') toast('No se pudo compartir'); });
+    return;
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([json], {type:'application/json'}));
+  a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); done();
+}
 function openSettings(){
   const perm = 'Notification' in window ? Notification.permission : 'unsupported';
   openSheet(`
@@ -1496,10 +1526,11 @@ function openSettings(){
       <button class="toggle ${S.notif && perm === 'granted' ? 'on' : ''}" id="s-notif" aria-label="Avisos"></button></div>
     <button class="ghost" id="s-cats">Gestionar categorías</button>
     <button class="ghost" id="s-exp">Exportar copia de seguridad</button>
+    <p class="lead" style="margin:-4px 0 10px;font-size:12px"><span id="s-bk">${backupText()}</span><button type="button" class="infob" aria-label="Más información" onclick="this.parentNode.nextElementSibling.classList.toggle('open')">i</button></p><div class="infot">Esta copia se hace para que tus datos estén siempre seguros y bajo tu control: Solo Gastos no los envía a servidores ni a proveedores de terceros, se quedan en tu móvil y tú decides dónde guardar la copia.</div>
     <button class="ghost" id="s-imp">Importar copia</button>
     <input type="file" id="s-file" accept="application/json" hidden>
     <button class="danger" id="s-clear">Borrar todo y empezar de cero</button>
-    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 29</p>`,
+    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 30</p>`,
   () => {
     $('#s-cats').onclick = openCats;
     $('#s-notif').onclick = async e => {
@@ -1509,18 +1540,7 @@ function openSettings(){
       if (p === 'granted') { S.notif = true; save(); e.target.classList.add('on'); checkReminders(); toast('Avisos activados'); }
       else toast('Permiso denegado en el navegador');
     };
-    $('#s-exp').onclick = () => {
-      const name = `solo-gastos-${iso(new Date())}.json`, json = JSON.stringify(S, null, 2);
-      const file = new File([json], name, {type:'application/json'});
-      // En el móvil se abre la hoja de compartir (Guardar en Archivos, AirDrop, Mensajes…); si no existe, descarga normal.
-      if (navigator.canShare && navigator.canShare({files:[file]})) {
-        navigator.share({files:[file], title:'Copia de Solo Gastos'}).catch(e => { if (e.name !== 'AbortError') toast('No se pudo compartir'); });
-        return;
-      }
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([json], {type:'application/json'}));
-      a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    };
+    $('#s-exp').onclick = exportBackup;
     $('#s-imp').onclick = () => $('#s-file').click();
     $('#s-file').onchange = async e => {
       try {
@@ -1550,6 +1570,11 @@ function checkReminders(){
     navigator.serviceWorker?.ready.then(r => r.showNotification('Solo Gastos', {body, icon:'icon-192.png', tag:k}))
       .catch(() => new Notification('Solo Gastos', {body}));
   });
+  if (backupDue()) {
+    const k = 'bk|' + (getUI('bk') || getUI('bk0'));
+    if (!seen[k]) { seen[k] = 1; const body = 'Haz una copia de seguridad de tus gastos (Ajustes → Exportar copia).';
+      navigator.serviceWorker?.ready.then(r => r.showNotification('Solo Gastos', {body, icon:'icon-192.png', tag:k})).catch(() => new Notification('Solo Gastos', {body})); }
+  }
   S.expenses.filter(needsPay).forEach(e => {
     const k = 'pay|' + e.id + '|' + e.due[0];
     if (seen[k]) return;
