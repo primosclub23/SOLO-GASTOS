@@ -213,6 +213,7 @@ input:focus,select:focus{border-color:rgba(99,242,195,.55)}
 .ico.has>svg{opacity:0}
 .ico .lg{position:absolute;inset:0;display:grid;place-items:center;animation:fade .5s both}
 .ico .lg svg{width:66%;height:66%;fill:var(--lc,#fff);stroke:none;filter:drop-shadow(0 0 7px color-mix(in srgb,var(--lc,#fff) 55%,transparent))}
+.namerow .ico{cursor:pointer}
 .ico img{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .35s}
 .ico img.ld{opacity:1}
 .ico img.full{object-fit:cover}
@@ -534,6 +535,7 @@ function hydrateLogos(){
 new MutationObserver(() => { clearTimeout(hydrateLogos.t); hydrateLogos.t = setTimeout(hydrateLogos, 30); }).observe(document.body, {childList:true, subtree:true});
 document.addEventListener('visibilitychange', () => { if (!document.hidden) hydrateLogos(); });
 function icoHTML(e, c){
+  if (e.img) return `<span class="ico has"><svg viewBox="0 0 24 24">${ICONS[c.icon] || ICONS.dots}</svg><img class="full ld" alt="" src="${e.img}"></span>`;
   const d = e.domain || guess(e.name);
   return `<span class="ico"${d ? ` data-d="${esc(d)}"` : ''}><svg viewBox="0 0 24 24">${ICONS[c.icon] || ICONS.dots}</svg></span>`;
 }
@@ -1352,7 +1354,7 @@ function openForm(id, catPref, kindPref){
     <div class="seg3" id="f-kind">${[['fixed', 'Gasto fijo'], ['variable', 'Gasto variable'], ['income', 'Ingreso']].map(([k, l]) => `<button data-v="${k}" class="${f.kind === k ? 'on' : ''}">${l}</button>`).join('')}</div>
     <div class="amtwrap"><input id="f-amount" inputmode="decimal" placeholder="0" value="${f.amount === '' ? '' : String(f.amount).replace('.', ',')}" autocomplete="off"><span>€</span></div>
     <div class="equiv" id="f-equiv"></div>
-    <div class="field"><label>Nombre</label><div class="namerow" id="f-logo-w" style="--c:${catNow().color}">${icoHTML(f, catNow())}<input id="f-name" placeholder="${inc0 ? 'Nómina, alquiler, proyecto…' : 'Netflix, Repsol, seguro del coche…'}" value="${esc(f.name)}" autocomplete="off"></div></div>
+    <div class="field"><label>Nombre</label><div class="namerow" id="f-logo-w" style="--c:${catNow().color}">${icoHTML(f, catNow())}<input type="file" id="f-photo" accept="image/*" hidden><input id="f-name" placeholder="${inc0 ? 'Nómina, alquiler, proyecto…' : 'Netflix, Repsol, seguro del coche…'}" value="${esc(f.name)}" autocomplete="off"></div></div>
     <div class="field" id="f-freq-w" style="display:${f.buys || f.kind === 'variable' ? 'none' : ''}"><label>Cada cuánto</label><div class="chips" id="f-freq">${Object.entries(FREQ).map(([k, v]) => `<button data-v="${k}" class="${f.freq === k ? 'on' : ''}">${v.l}</button>`).join('')}</div></div>
     <div class="field"><label>Importe</label><div class="chips" id="f-var">${modeChips()}</div></div>
     ${ex ? `<div class="field" id="f-pay-w" style="display:${f.mode === 'bill' ? '' : 'none'}"><label>Cobros registrados</label><div id="f-pays"></div>
@@ -1378,11 +1380,12 @@ function openForm(id, catPref, kindPref){
     };
     let lt;
     const logo = () => { clearTimeout(lt); lt = setTimeout(() => {
-      const c = catNow(), w = $('#f-logo-w'); w.style.setProperty('--c', c.color);
-      w.querySelector('.ico').outerHTML = icoHTML({name:$('#f-name').value, domain:cleanDomain($('#f-domain').value)}, c);
+      const c = catNow(), w = $('#f-logo-w'), hint = $('#f-logo-hint'); w.style.setProperty('--c', c.color);
+      w.querySelector('.ico').outerHTML = icoHTML({name:$('#f-name').value, domain:cleanDomain($('#f-domain').value), img:f.img}, c);
       hydrateLogos();
-      const dd = cleanDomain($('#f-domain').value) || guess($('#f-name').value), hint = $('#f-logo-hint');
-      if (!dd) { hint.textContent = ''; return; }
+      if (f.img) { hint.innerHTML = 'Foto propia · <button type="button" class="link" id="f-photo-x">Quitar</button>'; return; }
+      const dd = cleanDomain($('#f-domain').value) || guess($('#f-name').value);
+      if (!dd) { hint.textContent = 'Toca el icono para poner tu propia foto.'; return; }
       hint.textContent = 'Buscando logo…';
       resolveLogo(dd).then(L => { if (hint.isConnected) hint.textContent = L.t === 'none' ? 'No encuentro logo para esta web; se usa el icono de la categoría.' : 'Logo encontrado ✓'; });
     }, 350); };
@@ -1451,7 +1454,19 @@ function openForm(id, catPref, kindPref){
       };
     }
     amt.addEventListener('input', eq); $('#f-next').addEventListener('input', eq);
-    $('#f-name').addEventListener('input', logo); $('#f-domain').addEventListener('input', logo); eq();
+    $('#f-logo-w').addEventListener('click', ev => { if (ev.target.closest('.ico')) $('#f-photo').click(); });
+    $('#f-photo').addEventListener('change', ev => {
+      const file = ev.target.files[0]; ev.target.value = ''; if (!file) return;
+      const im = new Image(), url = URL.createObjectURL(file);
+      im.onload = () => { const n = 160, cv = document.createElement('canvas'); cv.width = cv.height = n;
+        const m = Math.min(im.width, im.height), cx = cv.getContext('2d');
+        cx.drawImage(im, (im.width - m) / 2, (im.height - m) / 2, m, m, 0, 0, n, n);
+        URL.revokeObjectURL(url); f.img = cv.toDataURL('image/jpeg', .88); logo(); };
+      im.onerror = () => { URL.revokeObjectURL(url); toast('No se pudo leer la imagen'); };
+      im.src = url;
+    });
+    $('#f-logo-hint').addEventListener('click', ev => { if (ev.target.closest('#f-photo-x')) { delete f.img; logo(); } });
+    $('#f-name').addEventListener('input', logo); $('#f-domain').addEventListener('input', logo); logo(); eq();
     if (!ex) setTimeout(() => amt.focus(), 450);
     $('#f-save').onclick = () => {
       const a = num(), name = $('#f-name').value.trim();
@@ -1460,6 +1475,7 @@ function openForm(id, catPref, kindPref){
       const inc = f.kind === 'income';
       const e = {id:ex ? ex.id : 'e' + Date.now(), name, cat:inc ? '__inc' : f.cat, amount:r2(a), freq:f.freq, variable:!!f.variable, payments:(ex && ex.payments) || [], due:(ex && ex.due) || [], next:$('#f-next').value,
         remind:+$('#f-remind').value, since:$('#f-since').value || ym(new Date()), note:$('#f-note').value.trim(), domain:cleanDomain($('#f-domain').value)};
+      if (f.img) e.img = f.img;
       if (inc) e.inc = true; else e.kind = f.kind;
       if (f.kind === 'variable') { e.freq = 'month'; e.next = ''; e.remind = 0; }
       if (f.buys) { e.buys = true; e.freq = 'month'; e.entries = (ex ? ex.entries : f.entries) || []; syncEntries(e); }
@@ -1483,7 +1499,7 @@ function openSettings(){
     <button class="ghost" id="s-imp">Importar copia</button>
     <input type="file" id="s-file" accept="application/json" hidden>
     <button class="danger" id="s-clear">Borrar todo y empezar de cero</button>
-    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 28</p>`,
+    <p class="lead" style="text-align:center;margin:18px 0 0;font-size:12px">Solo Gastos · versión 29</p>`,
   () => {
     $('#s-cats').onclick = openCats;
     $('#s-notif').onclick = async e => {
