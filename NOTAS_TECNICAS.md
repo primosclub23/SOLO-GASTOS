@@ -111,6 +111,18 @@ En «Por categorías», el botón de gráfico (`#btn-donut`) alterna la barra ap
 
 Icono del zorro (2026-10-20), a partir de la imagen que aportó el usuario (sin el texto «Grok Bot»): se recortó el zorro por luminancia y se recompuso sobre un fondo oscuro a sangre (sin esquinas redondeadas, iOS aplica la máscara) con una sombra suave; el zorro ocupa ~60 % del lado. Archivos: `icon-512.png` (manifiesto, «any maskable»), `icon-192.png` (manifiesto y favicon) e `icon-180.png` (`apple-touch-icon`). Se eliminó `icon.svg`. Si se cambia el icono, subir `VERSION` en `sw.js` y, en iOS, borrar y volver a añadir la app a la pantalla de inicio (iOS guarda el icono al instalarla).
 
+## 3h. Foto propia y recordatorio de copia (2026-11-03)
+
+- **Foto propia:** en el formulario, tocar el icono abre la fototeca (`#f-photo`). Se recorta cuadrada a 160 px y se guarda como JPEG en `img` (data URL) dentro del gasto; `icoHTML()` la usa antes que el logo web. «Quitar» (`#f-photo-x`) la borra.
+- **Recordatorio de copia:** `backupDue()` avisa 7 días después de empezar a usar la app (`bk0` en `sologastos.ui`) y luego cada 14 desde la última copia (`bk`, se anota al exportar con `exportBackup()`). Sale en la campanilla (suma 1 al badge) con botón «Hacer copia ahora» y una (i) que explica que los datos no pasan por terceros; también como notificación del sistema si los avisos están activos. Ajustes muestra «Última copia: …».
+- Decisión: de momento la copia es manual (hoja de compartir); la copia automática a un repo privado con token queda para si la app la usan más personas.
+
+## 3i. Presupuestos y «Tu año» (2026-11-03)
+
+- **Presupuestos:** `cat.budget` (opcional, € al mes) se edita en el formulario de categoría. `budgetRows()` compara el mes en curso (`aggMonth(ym(now)).byCat`) con el límite; nivel `ok` / `warn` (≥ 80 %) / `over` (≥ 100 %). `budgetSection()` pinta las barras en Inicio y en Variables; `notifs().bud` suma al badge de la campanilla y, con avisos activos, `checkReminders()` lanza una notificación por categoría, mes y nivel.
+- **Tu año:** conmutador Mes/Año dentro de la pantalla de resumen (`rcMode`, `rcSeg()`). `yearData(y)` suma `aggMonth` de los meses cerrados del año (si no hay ninguno, todos) y compara con el año anterior **solo en los meses que existen en los dos** (`partial` = «mismos meses»). `renderYear()` y `drawYear()` (imagen 1080×1920, base común en `rcCanvas()`).
+- `recapMonths()` ahora mira hasta 60 meses (`seriesFor(items, n)`), no solo los últimos 12; sin esto no había año anterior con el que comparar.
+
 ## 4. Avisos
 
 Notification API, comprobación **al abrir la app** (y al volver a primer plano). Un aviso por gasto y vencimiento (`sologastos.notified`).
@@ -119,7 +131,7 @@ Notification API, comprobación **al abrir la app** (y al volver a primer plano)
 ## 5. Pruebas locales
 
 Servir la carpeta con cualquier servidor estático (el service worker no corre en `file://`).
-Al subir cambios, subir `VERSION` en `sw.js`.
+Al subir cambios, ejecutar `python3 scripts/subir_version.py`: sube a la vez `VERSION` en `sw.js` y el «versión N» de Ajustes (con `--check` solo comprueba que coinciden). Con eso la app instalada se actualiza sola; **no hace falta borrar y volver a añadir el acceso directo**, salvo si cambia el icono (iOS lo guarda al instalar).
 
 ## 6. Bugs y lecciones
 
