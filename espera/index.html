@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Solo Gastos · Lista de espera</title>
+<meta name="description" content="Todos tus gastos al céntimo, con sus vencimientos. Sin cuentas, sin banco, sin terceros: tus datos se quedan en tu móvil. Apúntate al acceso anticipado.">
+<meta name="theme-color" content="#141310">
+<meta property="og:title" content="Solo Gastos · Todos tus gastos, al céntimo">
+<meta property="og:description" content="La app de gastos que no te pide cuentas ni banco. Apúntate a la lista de espera.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#141310;--surface:#1E1C18;--elevated:#2A2720;--border:rgba(255,255,255,.08);
+  --text:#F5F0E8;--muted:#A09880;--hint:#6B6050;--accent:#C97A54;--accent-h:#D4926C;
+  --mint:#63f2c3;--blue:#5aa9ff;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-weight:300;line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+::selection{background:var(--accent);color:var(--bg)}
+
+/* ---------- fondo ---------- */
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+  background:radial-gradient(ellipse 70% 60% at 50% 30%,#2A2218 0%,transparent 70%),var(--bg)}
+.orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;will-change:transform}
+.o1{width:520px;height:520px;left:-160px;top:12vh;background:radial-gradient(closest-side,rgba(99,242,195,.28),transparent);animation:drift 22s ease-in-out infinite alternate}
+.o2{width:620px;height:620px;right:-220px;top:-120px;background:radial-gradient(closest-side,rgba(90,169,255,.30),transparent);animation:drift 26s -8s ease-in-out infinite alternate-reverse}
+.o3{width:460px;height:460px;left:38%;bottom:-200px;background:radial-gradient(closest-side,rgba(201,122,84,.30),transparent);animation:drift 30s -4s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate3d(60px,-50px,0) scale(1.12)}}
+.grain{position:fixed;inset:-50%;z-index:1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:grain 1.2s steps(6) infinite}
+@keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}60%{transform:translate(-2%,-1%)}80%{transform:translate(3%,3%)}100%{transform:translate(0,0)}}
+
+/* ---------- nav ---------- */
+nav.top{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+  padding:calc(env(safe-area-inset-top) + 16px) clamp(18px,4vw,36px) 16px;
+  background:linear-gradient(to bottom,rgba(20,19,16,.85),rgba(20,19,16,0));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none}
+.brand img{width:36px;height:36px;border-radius:50%;border:.5px solid rgba(255,255,255,.12);object-fit:cover}
+.brand b{font-weight:500;font-size:14px}
+.nav-link{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#7A7060;text-decoration:none;display:flex;gap:8px;align-items:center;transition:color .3s}
+.nav-link::before{content:'✦';font-size:8px;color:var(--accent)}
+.nav-link:hover{color:var(--text)}
+
+/* ---------- piezas comunes ---------- */
+.label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--hint)}
+.badge{display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#C0B8A8;
+  background:rgba(255,255,255,.04);border:.5px solid rgba(255,255,255,.10);border-radius:100px;padding:7px 18px}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--accent);position:relative}
+.dot::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:.5px solid var(--accent);animation:ping 2s ease-out infinite}
+@keyframes ping{from{transform:scale(.4);opacity:1}to{transform:scale(1.8);opacity:0}}
+h1,h2,h3{font-family:'Playfair Display',Georgia,serif;font-weight:700;letter-spacing:-.01em;line-height:1.06;color:var(--text)}
+h1 em,h2 em,h3 em{font-style:italic;font-weight:400;color:var(--accent)}
+.xl{font-size:clamp(44px,7vw,88px)}
+.lg{font-size:clamp(30px,4.4vw,52px);line-height:1.12}
+.lead{font-size:clamp(15px,1.5vw,17px);color:var(--muted);max-width:520px}
+.btn-solid{font-family:'Inter',sans-serif;font-size:13px;font-weight:500;background:var(--text);color:var(--bg);border:none;border-radius:100px;padding:12px 24px;cursor:pointer;
+  transition:transform .35s var(--ease),box-shadow .35s var(--ease),background .3s;white-space:nowrap}
+.btn-solid:hover{transform:translateY(-2px);box-shadow:0 10px 30px -8px rgba(245,240,232,.45)}
+.btn-solid:active{transform:scale(.97)}
+.btn-solid[disabled]{opacity:.6;pointer-events:none}
+
+/* formulario */
+.wl{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:.5px solid rgba(255,255,255,.12);border-radius:100px;padding:6px 6px 6px 22px;width:min(100%,460px);
+  transition:border-color .3s,box-shadow .3s,background .3s}
+.wl:focus-within{border-color:rgba(201,122,84,.7);box-shadow:0 0 0 4px rgba(201,122,84,.12);background:rgba(255,255,255,.06)}
+.wl input{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--text);font:400 14px 'Inter',sans-serif}
+.wl input::placeholder{color:#7A7060}
+.wl .hp{position:absolute;left:-9999px;opacity:0;pointer-events:none}
+.wl-msg{min-height:22px;margin-top:12px;font-size:13px;color:var(--muted)}
+.wl-msg.ok{color:var(--mint)}
+.wl-done{display:none;align-items:center;gap:12px;padding:14px 22px;border-radius:100px;border:.5px solid rgba(99,242,195,.35);background:rgba(99,242,195,.07);color:var(--mint);font-size:14px;font-weight:400}
+.wl-done svg{width:22px;height:22px;stroke:var(--mint);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:30;stroke-dashoffset:30}
+.sent .wl,.sent .wl-msg{display:none}.sent .wl-done{display:inline-flex}.sent .wl-done svg{animation:draw .7s .1s var(--ease) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+/* ---------- reveal ---------- */
+.rv{opacity:0;transform:translateY(28px);filter:blur(6px);transition:opacity 1s var(--ease),transform 1s var(--ease),filter 1s var(--ease);transition-delay:calc(var(--d,0) * 90ms)}
+.rv.in{opacity:1;transform:none;filter:none}
+.w{display:inline-block;opacity:0;transform:translateY(.5em);filter:blur(10px);animation:wordin 1.1s var(--ease) forwards;animation-delay:calc(.25s + var(--i) * 90ms)}
+@keyframes wordin{to{opacity:1;transform:none;filter:none}}
+
+/* ---------- hero ---------- */
+.hero{position:relative;z-index:2;min-height:100svh;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:clamp(24px,5vw,72px);
+  max-width:1180px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 110px) clamp(20px,4vw,40px) 90px}
+.hero-l{display:flex;flex-direction:column;align-items:flex-start;gap:26px}
+.hero-l small{font-size:12px;color:var(--hint);max-width:420px;line-height:1.6}
+.stage{position:relative;display:grid;place-items:center;perspective:1200px;min-height:560px}
+
+/* móvil de maqueta */
+.phone{position:relative;width:292px;aspect-ratio:292/596;border-radius:46px;padding:9px;background:linear-gradient(160deg,#3a3830,#15140f 55%,#2a2720);
+  box-shadow:0 60px 100px -30px rgba(0,0,0,.85),0 0 0 .5px rgba(255,255,255,.18) inset,0 0 90px -20px rgba(99,242,195,.28);
+  transform-style:preserve-3d;transition:transform .25s ease-out;animation:float 7s ease-in-out infinite}
+@keyframes float{50%{translate:0 -14px}}
+.screen{position:relative;width:100%;height:100%;border-radius:38px;background:#050607;overflow:hidden;padding:46px 18px 18px;font-family:'Inter',sans-serif;font-weight:400;
+  background-image:radial-gradient(70% 36% at 90% 0%,rgba(90,169,255,.22),transparent 70%),radial-gradient(60% 30% at 0% 40%,rgba(99,242,195,.12),transparent 70%)}
+.isl{position:absolute;top:11px;left:50%;translate:-50% 0;width:84px;height:24px;border-radius:99px;background:#000}
+.s-l{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#8e8e93;font-weight:600}
+.s-n{font-size:42px;font-weight:700;letter-spacing:-.04em;line-height:1.05;margin-top:6px;color:#fff;font-variant-numeric:tabular-nums}
+.s-n i{font-style:normal;font-size:20px;color:#8e8e93;margin-left:3px;font-weight:600}
+.s-pill{display:inline-flex;gap:5px;align-items:center;margin-top:8px;padding:4px 9px;border-radius:99px;font-size:10px;font-weight:600;background:rgba(99,242,195,.12);color:var(--mint)}
+.s-spark{margin-top:14px;height:62px}
+.s-spark path.l{fill:none;stroke:var(--mint);stroke-width:2;stroke-linecap:round;stroke-dasharray:420;stroke-dashoffset:420;animation:draw2 2.4s .9s var(--ease) forwards}
+.s-spark path.a{fill:url(#sg);opacity:0;animation:fadein 1.2s 1.8s forwards}
+@keyframes draw2{to{stroke-dashoffset:0}}@keyframes fadein{to{opacity:1}}
+.s-row{display:flex;align-items:center;gap:10px;padding:9px 0}
+.s-ico{width:30px;height:30px;border-radius:10px;flex:none;background:var(--c);opacity:.9;display:grid;place-items:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+.s-ico svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.s-m{flex:1;min-width:0}.s-m b{display:block;font-size:11.5px;font-weight:600;color:#fff}
+.s-bar{display:block;height:4px;border-radius:4px;background:rgba(255,255,255,.08);margin-top:6px;overflow:hidden}
+.s-bar i{display:block;height:100%;width:0;background:var(--c);border-radius:4px;animation:grow 1.4s var(--ease) forwards;animation-delay:calc(1.4s + var(--i) * 140ms)}
+@keyframes grow{to{width:var(--w)}}
+.s-a{font-size:11.5px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+.s-dock{position:absolute;left:14px;right:14px;bottom:14px;height:46px;border-radius:99px;background:rgba(40,43,50,.7);border:.5px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-around}
+.s-dock i{width:30px;height:30px;border-radius:50%;background:var(--mint);display:grid;place-items:center;color:#04130e;font-style:normal;font-weight:700;font-size:20px;line-height:1;box-shadow:0 0 22px rgba(99,242,195,.55);animation:glow 3s ease-in-out infinite}
+.s-dock span{width:16px;height:4px;border-radius:4px;background:rgba(255,255,255,.22)}
+@keyframes glow{50%{box-shadow:0 0 34px rgba(99,242,195,.85)}}
+.chip{position:absolute;display:flex;align-items:center;gap:10px;padding:10px 16px 10px 12px;border-radius:16px;background:rgba(30,28,24,.72);border:.5px solid rgba(255,255,255,.12);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 20px 40px -16px rgba(0,0,0,.7);font-size:12px;font-weight:400;white-space:nowrap;
+  animation:float 6s ease-in-out infinite;animation-delay:var(--fd,0s);transition:transform .3s ease-out}
+.chip b{font-weight:500;display:block;font-size:12.5px;line-height:1.3}.chip small{color:var(--muted);font-size:11px;display:block;line-height:1.3}
+.chip .ci{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:var(--c)}
+.chip .ci svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.c1{right:-6%;top:7%;--fd:-1s}.c2{right:-8%;bottom:19%;--fd:-3s}.c3{left:-4%;bottom:7%;--fd:-5s}
+
+/* ---------- marquee ---------- */
+.mq{position:relative;z-index:2;border-block:.5px solid var(--border);overflow:hidden;padding:18px 0;background:rgba(255,255,255,.015);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.mq-t{display:flex;width:max-content;gap:44px;animation:mq 38s linear infinite}
+.mq:hover .mq-t{animation-play-state:paused}
+.mq span{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--hint);display:flex;gap:44px;align-items:center}
+.mq span::after{content:'✦';color:var(--accent);font-size:9px}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+/* ---------- secciones ---------- */
+section.sec{position:relative;z-index:2;max-width:1060px;margin:0 auto;padding:clamp(70px,10vw,130px) clamp(20px,4vw,40px) 0}
+.sec-label{display:flex;align-items:center;gap:12px;margin-bottom:22px;color:var(--hint)}
+.sec-label::after{content:'';flex:1;height:.5px;background:var(--border)}
+.sec-head{display:flex;flex-direction:column;gap:18px;margin-bottom:44px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.card{position:relative;overflow:hidden;background:var(--surface);border:.5px solid var(--border);border-radius:12px;padding:30px 26px 26px;
+  transition:transform .6s var(--ease),border-color .4s;--mx:50%;--my:0%}
+.card::before{content:'';position:absolute;inset:0;background:radial-gradient(380px circle at var(--mx) var(--my),rgba(201,122,84,.16),transparent 60%);opacity:0;transition:opacity .4s;pointer-events:none}
+.card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.16)}.card:hover::before{opacity:1}
+.num{position:absolute;top:-12px;left:16px;font-family:'Playfair Display',serif;font-size:92px;font-style:italic;font-weight:400;color:var(--text);opacity:.07;line-height:1;user-select:none}
+.tag{display:inline-block;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;background:rgba(168,148,100,.12);color:#A09460;border:.5px solid rgba(168,148,100,.25);border-radius:100px;padding:3px 10px;margin-bottom:14px;position:relative}
+.card h3{font-size:clamp(20px,2.4vw,24px);line-height:1.25;margin-bottom:10px;position:relative}
+.card p{font-size:13.5px;color:var(--muted);position:relative}
+.mini{margin-top:20px;position:relative;height:64px;display:flex;align-items:flex-end;gap:5px}
+.mini i{flex:1;border-radius:5px;background:linear-gradient(to top,rgba(90,169,255,.35),rgba(90,169,255,.8));height:0;transition:height 1.2s var(--ease);transition-delay:calc(var(--i) * 60ms)}
+.card.in .mini i{height:var(--h)}
+.mini i.mx{background:linear-gradient(to top,rgba(99,242,195,.35),var(--mint))}
+.meter{margin-top:22px;position:relative;display:flex;flex-direction:column;gap:12px}
+.meter div{display:flex;flex-direction:column;gap:6px;font-size:11px;color:var(--muted)}
+.meter div span{display:flex;justify-content:space-between}
+.meter em{display:block;height:5px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden}
+.meter em::after{content:'';display:block;height:100%;width:0;border-radius:5px;background:var(--c);transition:width 1.4s var(--ease) .3s}
+.card.in .meter em::after{width:var(--w)}
+.pillrow{margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;position:relative}
+.pillrow span{font-size:11px;padding:6px 12px;border-radius:100px;border:.5px solid rgba(255,255,255,.12);color:var(--muted);background:rgba(255,255,255,.03)}
+.pillrow span.on{color:var(--bg);background:var(--text);border-color:transparent}
+
+/* privacidad */
+.priv{text-align:center;display:flex;flex-direction:column;align-items:center;gap:22px}
+.zeros{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;margin-top:14px}
+.zero{padding:30px 16px;border:.5px solid var(--border);border-radius:12px;background:var(--surface)}
+.zero b{display:block;font-family:'Playfair Display',serif;font-size:clamp(54px,8vw,92px);font-weight:400;font-style:italic;line-height:1;color:var(--accent)}
+.zero span{display:block;margin-top:10px;font-size:13px;color:var(--muted)}
+
+/* faq */
+.faq{display:flex;flex-direction:column}
+details{border-top:.5px solid var(--border);padding:22px 4px}details:last-child{border-bottom:.5px solid var(--border)}
+summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:20px;align-items:center;font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(17px,2vw,20px);line-height:1.3}
+summary::-webkit-details-marker{display:none}
+summary::after{content:'+';font-family:'Space Mono',monospace;font-weight:400;color:var(--accent);font-size:22px;transition:transform .4s var(--ease);flex:none}
+details[open] summary::after{transform:rotate(45deg)}
+details p{margin-top:12px;font-size:14px;color:var(--muted);max-width:640px}
+
+/* final */
+.final{text-align:center;display:flex;flex-direction:column;align-items:center;gap:26px;padding-bottom:40px}
+.final .panel{width:100%;padding:clamp(40px,7vw,80px) 24px;border-radius:20px;border:.5px solid var(--border);background:
+  radial-gradient(ellipse 70% 80% at 50% 0%,rgba(201,122,84,.18),transparent 70%),var(--surface);display:flex;flex-direction:column;align-items:center;gap:24px}
+footer{position:relative;z-index:2;max-width:1060px;margin:70px auto 0;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  padding:24px clamp(20px,4vw,40px) calc(env(safe-area-inset-bottom) + 28px);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.06em;color:var(--hint);border-top:.5px solid var(--border)}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .c1{right:0}.c2{right:0}.c3{left:0}
+  .hero{grid-template-columns:1fr;text-align:center;padding-top:calc(env(safe-area-inset-top) + 96px)}
+  .hero-l{align-items:center}.hero-l small{text-align:center}
+  .stage{min-height:600px}
+  .grid{grid-template-columns:1fr}
+}
+@media (max-width:480px){
+  .zeros{grid-template-columns:1fr}
+  .wl{padding-left:16px}.btn-solid{padding:12px 18px}
+  .chip{transform:scale(.88)}
+  .nav-link{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;transition-delay:0s!important}
+  .rv,.w{opacity:1;transform:none;filter:none}
+  .s-spark path.l{stroke-dashoffset:0}.s-bar i{width:var(--w)}
+}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
+<div class="grain"></div>
+
+<nav class="top">
+  <a class="brand" href="#top"><img src="../icon-192.png" alt=""><b>Solo Gastos</b></a>
+  <a class="nav-link" href="#apuntate">Lista de espera</a>
+</nav>
+
+<main id="top">
+<header class="hero">
+  <div class="hero-l">
+    <div class="badge rv"><span class="dot"></span>Acceso anticipado · Próximamente</div>
+    <h1 class="xl" aria-label="Todos tus gastos, al céntimo.">
+      <span class="w" style="--i:0">Todos</span> <span class="w" style="--i:1">tus</span> <span class="w" style="--i:2">gastos,</span><br>
+      <em><span class="w" style="--i:3">al</span> <span class="w" style="--i:4">céntimo.</span></em>
+    </h1>
+    <p class="lead rv" style="--d:3">Tus fijos, tus variables y sus vencimientos en una sola app. Sin cuentas, sin vincular el banco y sin que tus datos salgan de tu móvil.</p>
+    <div class="rv" style="--d:4">
+      <div class="wl-wrap">
+        <form class="wl" novalidate>
+          <input type="email" name="email" placeholder="tu@correo.com" autocomplete="email" inputmode="email" aria-label="Tu correo" required>
+          <input class="hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button class="btn-solid" type="submit">Apuntarme</button>
+        </form>
+        <p class="wl-msg" aria-live="polite"></p>
+        <div class="wl-done"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>¡Apuntado! Te escribiré cuando abra.</div>
+      </div>
+    </div>
+    <small class="rv" style="--d:5">Solo uso tu correo para avisarte del lanzamiento. Nada de spam, y puedes pedirme que te borre cuando quieras.</small>
+  </div>
+
+  <div class="stage rv" style="--d:2" id="stage">
+    <div class="phone" id="phone">
+      <div class="screen">
+        <div class="isl"></div>
+        <div class="s-l">Gastas al mes</div>
+        <div class="s-n"><span id="cnt" data-to="2283.33">0</span><i>€</i></div>
+        <div class="s-pill"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>4 % vs mes anterior</div>
+        <svg class="s-spark" viewBox="0 0 256 62" preserveAspectRatio="none"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#63f2c3" stop-opacity=".35"/><stop offset="1" stop-color="#63f2c3" stop-opacity="0"/></linearGradient></defs>
+          <path class="a" d="M0 44C24 40 38 48 60 36S98 30 120 34 160 14 190 20 232 8 256 6V62H0Z"/><path class="l" d="M0 44C24 40 38 48 60 36S98 30 120 34 160 14 190 20 232 8 256 6"/></svg>
+        <div style="margin-top:10px">
+          <div class="s-row" style="--c:#5aa9ff"><span class="s-ico"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/></svg></span><span class="s-m"><b>Vivienda</b><span class="s-bar"><i style="--w:92%;--i:0"></i></span></span><span class="s-a">1.095 €</span></div>
+          <div class="s-row" style="--c:#9be15d"><span class="s-ico"><svg viewBox="0 0 24 24"><path d="M5 9h14l-1.5 9h-11zM9 9l3-5 3 5"/></svg></span><span class="s-m"><b>Alimentación</b><span class="s-bar"><i style="--w:56%;--i:1"></i></span></span><span class="s-a">560 €</span></div>
+          <div class="s-row" style="--c:#ffc457"><span class="s-ico"><svg viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg></span><span class="s-m"><b>Suministros</b><span class="s-bar"><i style="--w:32%;--i:2"></i></span></span><span class="s-a">153 €</span></div>
+          <div class="s-row" style="--c:#ff8a7a"><span class="s-ico"><svg viewBox="0 0 24 24"><path d="M4 16V11l2-4h12l2 4v5M7 16v2M17 16v2"/></svg></span><span class="s-m"><b>Transporte</b><span class="s-bar"><i style="--w:24%;--i:3"></i></span></span><span class="s-a">120 €</span></div>
+        </div>
+        <div class="s-dock"><span></span><span></span><i>+</i><span></span><span></span></div>
+      </div>
+    </div>
+    <div class="chip c1" data-p="14"><span class="ci" style="--c:#8a6cff"><svg viewBox="0 0 24 24"><path d="M17 2l4 4-4 4M3 11V9a3 3 0 013-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 01-3 3H3"/></svg></span><span><b>Spotify</b><small>Se renueva en 2 días</small></span></div>
+    <div class="chip c2" data-p="-18"><span class="ci" style="--c:#ffc457"><svg viewBox="0 0 24 24"><path d="M12 8v5l3 2M12 3a9 9 0 100 18 9 9 0 000-18z"/></svg></span><span><b>Supermercado</b><small>Vas al 84 % del presupuesto</small></span></div>
+    <div class="chip c3" data-p="10"><span class="ci" style="--c:#63f2c3"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span><b>Tu mes está listo</b><small>Compártelo en una imagen</small></span></div>
+  </div>
+</header>
+
+<div class="mq" aria-hidden="true"><div class="mq-t">
+  <span>Vivienda</span><span>Suscripciones</span><span>Suministros</span><span>Seguros</span><span>Transporte</span><span>Alimentación</span><span>Salud</span><span>Ocio</span><span>Educación</span>
+  <span>Vivienda</span><span>Suscripciones</span><span>Suministros</span><span>Seguros</span><span>Transporte</span><span>Alimentación</span><span>Salud</span><span>Ocio</span><span>Educación</span>
+</div></div>
+
+<section class="sec" id="que">
+  <div class="sec-label label rv">Qué hace</div>
+  <div class="sec-head"><h2 class="lg rv">Lo importante, <em>sin ruido</em></h2><p class="lead rv" style="--d:1">Pensada para controlar lo que pagas cada mes y cuándo lo pagas, no para llenarte de gráficos que nunca miras.</p></div>
+  <div class="grid">
+    <article class="card rv"><span class="num">01</span><span class="tag">Fijos y variables</span><h3>Cada gasto, <em>a su ritmo</em></h3><p>Alquiler, seguros y suscripciones con sus fechas de cobro; supermercado y gasolina con compras sueltas. Todo se convierte a lo que te cuesta al mes y al año.</p>
+      <div class="mini" aria-hidden="true"><i style="--h:40%;--i:0"></i><i style="--h:55%;--i:1"></i><i style="--h:35%;--i:2"></i><i style="--h:70%;--i:3"></i><i style="--h:60%;--i:4"></i><i style="--h:82%;--i:5"></i><i class="mx" style="--h:100%;--i:6"></i></div></article>
+    <article class="card rv" style="--d:1"><span class="num">02</span><span class="tag">Vencimientos</span><h3>Que nada te <em>pille por sorpresa</em></h3><p>Te avisa antes de cada cobro y te pregunta cuánto fue en los recibos que cambian, como la luz o el agua. Con eso calcula tu media real.</p>
+      <div class="pillrow" aria-hidden="true"><span class="on">En 2 días</span><span>Mañana</span><span>1 sem</span><span>15 días</span></div></article>
+    <article class="card rv"><span class="num">03</span><span class="tag">Presupuestos</span><h3>Pon un límite y <em>deja que avise</em></h3><p>Fija un tope por categoría. La app te avisa al llegar al 80 % y cuando te pasas, antes de que termine el mes.</p>
+      <div class="meter" aria-hidden="true"><div style="--c:#6bf08f;--w:48%"><span>Ocio<b>48 %</b></span><em></em></div><div style="--c:#ffc457;--w:84%"><span>Supermercado<b>84 %</b></span><em></em></div><div style="--c:#ff8a7a;--w:100%"><span>Suscripciones<b>Te pasas</b></span><em></em></div></div></article>
+    <article class="card rv" style="--d:1"><span class="num">04</span><span class="tag">Tu mes · Tu año</span><h3>Un resumen que <em>da gusto compartir</em></h3><p>Cierra cada mes y cada año con dónde se fue el dinero y cómo cambia frente al anterior. Con una imagen lista para enviar, y con la opción de ocultar las cifras.</p></article>
+  </div>
+</section>
+
+<section class="sec priv" id="privacidad">
+  <div class="sec-label label rv" style="width:100%">Privacidad</div>
+  <h2 class="lg rv">Tus gastos son tuyos.<br><em>No de un tercero.</em></h2>
+  <p class="lead rv" style="--d:1">Los datos viven solo en tu móvil. La app no te pide registro, no se conecta a tu banco y no manda tus importes a ningún servidor. Tú decides dónde guardar la copia de seguridad.</p>
+  <div class="zeros">
+    <div class="zero rv"><b data-count="0">0</b><span>cuentas que crear</span></div>
+    <div class="zero rv" style="--d:1"><b data-count="0">0</b><span>bancos que vincular</span></div>
+    <div class="zero rv" style="--d:2"><b data-count="0">0</b><span>servidores con tus datos</span></div>
+  </div>
+</section>
+
+<section class="sec" id="faq">
+  <div class="sec-label label rv">Preguntas</div>
+  <div class="sec-head"><h2 class="lg rv">Lo que <em>quizá te preguntes</em></h2></div>
+  <div class="faq rv">
+    <details><summary>¿Cómo se instala?</summary><p>Desde Safari, sin App Store: abres la dirección que te mando y eliges «Añadir a pantalla de inicio». Se abre a pantalla completa y funciona sin conexión.</p></details>
+    <details><summary>¿Dónde se guardan mis datos?</summary><p>Solo en tu dispositivo. Por eso la app te recuerda hacer copias de seguridad, que guardas tú donde quieras, por ejemplo en Archivos.</p></details>
+    <details><summary>¿Cuánto costará?</summary><p>Todavía lo estoy decidiendo. Quien se apunte a la lista será de los primeros en enterarse y en probarla.</p></details>
+    <details><summary>¿Y si cambio de móvil?</summary><p>Exportas una copia desde Ajustes y la importas en el nuevo. Es un archivo pequeño que puedes guardar en iCloud o enviarte por mensaje.</p></details>
+    <details><summary>¿Hay versión para Android?</summary><p>Funciona en cualquier navegador moderno. Está pensada y probada sobre todo para iPhone.</p></details>
+  </div>
+</section>
+
+<section class="sec final" id="apuntate">
+  <div class="panel rv">
+    <span class="badge"><span class="dot"></span>Acceso anticipado</span>
+    <h2 class="lg">Sé de los <em>primeros</em> en probarla</h2>
+    <p class="lead">Déjame tu correo y te aviso el día que abra, antes que al resto.</p>
+    <div class="wl-wrap" style="width:100%;display:flex;flex-direction:column;align-items:center">
+      <form class="wl" novalidate>
+        <input type="email" name="email" placeholder="tu@correo.com" autocomplete="email" inputmode="email" aria-label="Tu correo" required>
+        <input class="hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="btn-solid" type="submit">Apuntarme</button>
+      </form>
+      <p class="wl-msg" aria-live="polite"></p>
+      <div class="wl-done"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>¡Apuntado! Te escribiré cuando abra.</div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer><span>© 2026 · Solo Gastos</span><span>Hecho con cuidado, sin rastreadores</span></footer>
+
+<script>
+// ► Endpoint del formulario (p. ej. Formspree: https://formspree.io/f/xxxxxxxx). Mientras esté vacío la página no recoge correos.
+const WAITLIST_ENDPOINT = '';
+
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// reveal al hacer scroll
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold:.15, rootMargin:'0px 0px -6% 0px'});
+document.querySelectorAll('.rv').forEach(el => io.observe(el));
+
+// contador del móvil
+(function(){
+  const el = document.getElementById('cnt'), to = +el.dataset.to, fmt = n => n.toLocaleString('de-DE', {minimumFractionDigits:2, maximumFractionDigits:2});
+  if (reduced) { el.textContent = fmt(to); return; }
+  setTimeout(() => { const t0 = performance.now(), dur = 1800;
+    (function f(now){ const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 4); el.textContent = fmt(to * e); if (k < 1) requestAnimationFrame(f); })(t0); }, 700);
+})();
+
+// inclinación 3D del móvil y paralaje de las tarjetas
+(function(){
+  if (reduced || !matchMedia('(hover:hover)').matches) return;
+  const stage = document.getElementById('stage'), phone = document.getElementById('phone'), chips = stage.querySelectorAll('.chip');
+  stage.addEventListener('pointermove', ev => {
+    const r = stage.getBoundingClientRect(), x = (ev.clientX - r.left) / r.width - .5, y = (ev.clientY - r.top) / r.height - .5;
+    phone.style.transform = `rotateY(${x * 16}deg) rotateX(${-y * 12}deg)`;
+    chips.forEach(c => { const p = +c.dataset.p; c.style.transform = `translate(${x * p * 2}px,${y * p * 2}px)`; });
+  });
+  stage.addEventListener('pointerleave', () => { phone.style.transform = ''; chips.forEach(c => c.style.transform = ''); });
+})();
+
+// foco que sigue al puntero en las tarjetas
+document.querySelectorAll('.card').forEach(c => c.addEventListener('pointermove', ev => {
+  const r = c.getBoundingClientRect(); c.style.setProperty('--mx', (ev.clientX - r.left) + 'px'); c.style.setProperty('--my', (ev.clientY - r.top) + 'px');
+}));
+
+// formularios
+document.querySelectorAll('.wl').forEach(form => {
+  const wrap = form.closest('.wl-wrap'), msg = wrap.querySelector('.wl-msg'), btn = form.querySelector('button');
+  form.addEventListener('submit', async ev => {
+    ev.preventDefault(); msg.className = 'wl-msg';
+    const email = form.email.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { msg.textContent = 'Escribe un correo válido.'; form.email.focus(); return; }
+    if (form._gotcha.value) return; // trampa para bots
+    if (!WAITLIST_ENDPOINT) { msg.textContent = 'La lista de espera abre muy pronto. Vuelve en unos días.'; return; }
+    btn.disabled = true; msg.textContent = 'Enviando…';
+    try {
+      const r = await fetch(WAITLIST_ENDPOINT, {method:'POST', headers:{'Accept':'application/json','Content-Type':'application/json'}, body:JSON.stringify({email, origen:'lista-de-espera'})});
+      if (!r.ok) throw 0;
+      wrap.classList.add('sent');
+    } catch { msg.textContent = 'No se pudo enviar. Inténtalo de nuevo en un momento.'; btn.disabled = false; }
+  });
+});
+</script>
+</body>
+</html>
