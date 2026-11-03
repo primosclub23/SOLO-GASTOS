@@ -117,6 +117,12 @@ Icono del zorro (2026-10-20), a partir de la imagen que aportó el usuario (sin 
 - **Recordatorio de copia:** `backupDue()` avisa 7 días después de empezar a usar la app (`bk0` en `sologastos.ui`) y luego cada 14 desde la última copia (`bk`, se anota al exportar con `exportBackup()`). Sale en la campanilla (suma 1 al badge) con botón «Hacer copia ahora» y una (i) que explica que los datos no pasan por terceros; también como notificación del sistema si los avisos están activos. Ajustes muestra «Última copia: …».
 - Decisión: de momento la copia es manual (hoja de compartir); la copia automática a un repo privado con token queda para si la app la usan más personas.
 
+## 3i. Presupuestos y «Tu año» (2026-11-03)
+
+- **Presupuestos:** `cat.budget` (opcional, € al mes) se edita en el formulario de categoría. `budgetRows()` compara el mes en curso (`aggMonth(ym(now)).byCat`) con el límite; nivel `ok` / `warn` (≥ 80 %) / `over` (≥ 100 %). `budgetSection()` pinta las barras en Inicio y en Variables; `notifs().bud` suma al badge de la campanilla y, con avisos activos, `checkReminders()` lanza una notificación por categoría, mes y nivel.
+- **Tu año:** conmutador Mes/Año dentro de la pantalla de resumen (`rcMode`, `rcSeg()`). `yearData(y)` suma `aggMonth` de los meses cerrados del año (si no hay ninguno, todos) y compara con el año anterior **solo en los meses que existen en los dos** (`partial` = «mismos meses»). `renderYear()` y `drawYear()` (imagen 1080×1920, base común en `rcCanvas()`).
+- `recapMonths()` ahora mira hasta 60 meses (`seriesFor(items, n)`), no solo los últimos 12; sin esto no había año anterior con el que comparar.
+
 ## 4. Avisos
 
 Notification API, comprobación **al abrir la app** (y al volver a primer plano). Un aviso por gasto y vencimiento (`sologastos.notified`).
