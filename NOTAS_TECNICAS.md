@@ -125,7 +125,7 @@ Notification API, comprobación **al abrir la app** (y al volver a primer plano)
 ## 5. Pruebas locales
 
 Servir la carpeta con cualquier servidor estático (el service worker no corre en `file://`).
-Al subir cambios, subir `VERSION` en `sw.js`.
+Al subir cambios, ejecutar `python3 scripts/subir_version.py`: sube a la vez `VERSION` en `sw.js` y el «versión N» de Ajustes (con `--check` solo comprueba que coinciden). Con eso la app instalada se actualiza sola; **no hace falta borrar y volver a añadir el acceso directo**, salvo si cambia el icono (iOS lo guarda al instalar).
 
 ## 6. Bugs y lecciones
 
