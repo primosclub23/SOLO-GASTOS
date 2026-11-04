@@ -231,6 +231,20 @@ footer{position:relative;z-index:2;max-width:1060px;margin:70px auto 0;display:f
 .mrow em{font-style:normal;font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.08);color:#d8d8dc}
 .mrow em.now{background:rgba(255,138,122,.16);color:#ff8a7a}
 
+
+/* vídeo */
+.vsec{max-width:1060px}
+.vwrap{position:relative;border-radius:20px;overflow:hidden;border:.5px solid rgba(255,255,255,.14);background:#050607;aspect-ratio:16/9;
+  box-shadow:0 60px 100px -40px rgba(0,0,0,.9),0 0 120px -30px rgba(99,242,195,.25)}
+.vwrap video{display:block;width:100%;height:100%;object-fit:cover;background:#050607}
+.vplay{position:absolute;inset:0;display:grid;place-items:end center;padding-bottom:clamp(14px,4vw,38px);background:linear-gradient(to top,rgba(5,6,7,.55),rgba(5,6,7,.1));cursor:pointer;border:none;color:var(--text);transition:opacity .5s var(--ease)}
+.vplay span{display:flex;align-items:center;gap:14px;padding:12px 26px 12px 12px;border-radius:100px;background:rgba(245,240,232,.95);color:var(--bg);font:500 14px 'Inter',sans-serif;box-shadow:0 20px 50px -10px rgba(0,0,0,.7);transition:transform .4s var(--ease)}
+.vplay:hover span{transform:scale(1.05)}
+.vplay i{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:var(--bg);position:relative}
+.vplay i::before{content:'';border-left:14px solid var(--text);border-block:9px solid transparent;margin-left:4px}
+.vplay i::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:.5px solid rgba(20,19,16,.5);animation:ping 2.2s ease-out infinite}
+.vwrap.playing .vplay{opacity:0;pointer-events:none}
+
 /* ---------- responsive ---------- */
 @media (max-width:900px){
   .c1{right:0}.c2{right:0}.c3{left:0}
@@ -318,6 +332,15 @@ footer{position:relative;z-index:2;max-width:1060px;margin:70px auto 0;display:f
   <div class="mq-t"><span class="pill2"><span class="tile sm" style="--lc:#E50914"><svg viewBox="0 0 24 24"><use href="#i-netflix"/></svg></span>Netflix</span><span class="pill2"><span class="tile sm" style="--lc:#1DB954"><svg viewBox="0 0 24 24"><use href="#i-spotify"/></svg></span>Spotify</span><span class="pill2"><span class="tile sm" style="--lc:#D97757"><svg viewBox="0 0 24 24"><use href="#i-claude"/></svg></span>Claude</span><span class="pill2"><span class="tile sm" style="--lc:#FF3B3B"><svg viewBox="0 0 24 24"><use href="#i-youtube"/></svg></span>YouTube</span><span class="pill2"><span class="tile sm" style="--lc:#1BA7FF"><svg viewBox="0 0 24 24"><use href="#i-primevideo"/></svg></span>Prime Video</span><span class="pill2"><span class="tile sm" style="--lc:#FA243C"><svg viewBox="0 0 24 24"><use href="#i-applemusic"/></svg></span>Apple Music</span><span class="pill2"><span class="tile sm" style="--lc:#4DA3FF"><svg viewBox="0 0 24 24"><use href="#i-icloud"/></svg></span>iCloud</span><span class="pill2"><span class="tile sm" style="--lc:#FFFFFF"><svg viewBox="0 0 24 24"><use href="#i-notion"/></svg></span>Notion</span><span class="pill2"><span class="tile sm" style="--lc:#2B7BFF"><svg viewBox="0 0 24 24"><use href="#i-dropbox"/></svg></span>Dropbox</span><span class="pill2"><span class="tile sm" style="--lc:#E50914"><svg viewBox="0 0 24 24"><use href="#i-netflix"/></svg></span>Netflix</span><span class="pill2"><span class="tile sm" style="--lc:#1DB954"><svg viewBox="0 0 24 24"><use href="#i-spotify"/></svg></span>Spotify</span><span class="pill2"><span class="tile sm" style="--lc:#D97757"><svg viewBox="0 0 24 24"><use href="#i-claude"/></svg></span>Claude</span><span class="pill2"><span class="tile sm" style="--lc:#FF3B3B"><svg viewBox="0 0 24 24"><use href="#i-youtube"/></svg></span>YouTube</span><span class="pill2"><span class="tile sm" style="--lc:#1BA7FF"><svg viewBox="0 0 24 24"><use href="#i-primevideo"/></svg></span>Prime Video</span><span class="pill2"><span class="tile sm" style="--lc:#FA243C"><svg viewBox="0 0 24 24"><use href="#i-applemusic"/></svg></span>Apple Music</span><span class="pill2"><span class="tile sm" style="--lc:#4DA3FF"><svg viewBox="0 0 24 24"><use href="#i-icloud"/></svg></span>iCloud</span><span class="pill2"><span class="tile sm" style="--lc:#FFFFFF"><svg viewBox="0 0 24 24"><use href="#i-notion"/></svg></span>Notion</span><span class="pill2"><span class="tile sm" style="--lc:#2B7BFF"><svg viewBox="0 0 24 24"><use href="#i-dropbox"/></svg></span>Dropbox</span></div>
   <div class="mq-t rev"><span class="pill2"><span class="tile sm" style="--lc:#58CC02"><svg viewBox="0 0 24 24"><use href="#i-duolingo"/></svg></span>Duolingo</span><span class="pill2"><span class="tile sm" style="--lc:#F24E1E"><svg viewBox="0 0 24 24"><use href="#i-figma"/></svg></span>Figma</span><span class="pill2"><span class="tile sm" style="--lc:#00C4CC"><svg viewBox="0 0 24 24"><use href="#i-canva"/></svg></span>Canva</span><span class="pill2"><span class="tile sm" style="--lc:#FFFFFF"><svg viewBox="0 0 24 24"><use href="#i-openai"/></svg></span>ChatGPT</span><span class="pill2"><span class="tile sm" style="--lc:#FFFFFF"><svg viewBox="0 0 24 24"><use href="#i-github"/></svg></span>GitHub</span><span class="pill2"><span class="tile sm" style="--lc:#7289FF"><svg viewBox="0 0 24 24"><use href="#i-discord"/></svg></span>Discord</span><span class="pill2"><span class="tile sm" style="--lc:#A970FF"><svg viewBox="0 0 24 24"><use href="#i-twitch"/></svg></span>Twitch</span><span class="pill2"><span class="tile sm" style="--lc:#F47521"><svg viewBox="0 0 24 24"><use href="#i-crunchyroll"/></svg></span>Crunchyroll</span><span class="pill2"><span class="tile sm" style="--lc:#FF3B30"><svg viewBox="0 0 24 24"><use href="#i-adobe"/></svg></span>Adobe</span><span class="pill2"><span class="tile sm" style="--lc:#58CC02"><svg viewBox="0 0 24 24"><use href="#i-duolingo"/></svg></span>Duolingo</span><span class="pill2"><span class="tile sm" style="--lc:#F24E1E"><svg viewBox="0 0 24 24"><use href="#i-figma"/></svg></span>Figma</span><span class="pill2"><span class="tile sm" style="--lc:#00C4CC"><svg viewBox="0 0 24 24"><use href="#i-canva"/></svg></span>Canva</span><span class="pill2"><span class="tile sm" style="--lc:#FFFFFF"><svg viewBox="0 0 24 24"><use href="#i-openai"/></svg></span>ChatGPT</span><span class="pill2"><span class="tile sm" style="--lc:#FFFFFF"><svg viewBox="0 0 24 24"><use href="#i-github"/></svg></span>GitHub</span><span class="pill2"><span class="tile sm" style="--lc:#7289FF"><svg viewBox="0 0 24 24"><use href="#i-discord"/></svg></span>Discord</span><span class="pill2"><span class="tile sm" style="--lc:#A970FF"><svg viewBox="0 0 24 24"><use href="#i-twitch"/></svg></span>Twitch</span><span class="pill2"><span class="tile sm" style="--lc:#F47521"><svg viewBox="0 0 24 24"><use href="#i-crunchyroll"/></svg></span>Crunchyroll</span><span class="pill2"><span class="tile sm" style="--lc:#FF3B30"><svg viewBox="0 0 24 24"><use href="#i-adobe"/></svg></span>Adobe</span></div>
 </div>
+
+<section class="sec vsec" id="video">
+  <div class="sec-label label rv">En acción</div>
+  <div class="sec-head"><h2 class="lg rv">Míralo <em>en 37 segundos</em></h2><p class="lead rv" style="--d:1">Un recorrido por la app: tu panel, tus suscripciones, los presupuestos y tu resumen del mes y del año. Con datos de ejemplo.</p></div>
+  <div class="vwrap rv" id="vwrap" style="--d:2">
+    <video id="vid" preload="metadata" playsinline poster="presentacion-portada.jpg" aria-label="Vídeo de presentación de Solo Gastos"><source src="presentacion.mp4" type="video/mp4"></video>
+    <button class="vplay" id="vplay" aria-label="Reproducir el vídeo"><span><i></i>Ver el vídeo · 37 s</span></button>
+  </div>
+</section>
 
 <section class="sec" id="suscripciones">
   <div class="subs">
@@ -433,6 +456,14 @@ document.querySelectorAll('.rv').forEach(el => io.observe(el));
   if (reduced) { el.textContent = fmt(to); return; }
   setTimeout(() => { const t0 = performance.now(), dur = 1800;
     (function f(now){ const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 4); el.textContent = fmt(to * e); if (k < 1) requestAnimationFrame(f); })(t0); }, 700);
+})();
+
+// vídeo de presentación
+(function(){
+  const v = document.getElementById('vid'), w = document.getElementById('vwrap'), b = document.getElementById('vplay');
+  b.addEventListener('click', () => { w.classList.add('playing'); v.controls = true; v.play().catch(() => { w.classList.remove('playing'); v.controls = false; }); });
+  v.addEventListener('pause', () => { if (v.ended || v.currentTime < .1) { w.classList.remove('playing'); v.controls = false; } });
+  v.addEventListener('ended', () => { w.classList.remove('playing'); v.controls = false; v.currentTime = 0; });
 })();
 
 // contador del segundo móvil al entrar en pantalla
