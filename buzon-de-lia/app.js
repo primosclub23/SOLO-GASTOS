@@ -1,4 +1,4 @@
-/* El buzón de Lia · tu lado en el móvil (maqueta) */
+/* El buzón de Lia · el escritorio: quien escribe, en el móvil (maqueta) */
 (function () {
   'use strict';
   var B = window.__BUZON__;
@@ -9,14 +9,14 @@
   var app = $('[data-app]');
   if (!app) return;
   var phone = $('[data-phone]', app), tabbar = $('[data-tabbar]', app);
-  var state = { scr: 'login', tema: 'Lo que he aprendido', lock: 'Sin candado', as: null };
+  var state = { scr: 'login', tema: 'Lo que he aprendido', lock: 'Sin candado', as: null, me: 'Quien más te quiere', signFor: 'guest' };
 
   /* ---------- Navegación entre pantallas ---------- */
   function go(name) {
     state.scr = name;
     if (name === 'home' || name === 'login' || name === 'plan') setAs(null);
     $$('[data-scr]', phone).forEach(function (s) { s.hidden = s.dataset.scr !== name; });
-    tabbar.hidden = name === 'login' || name === 'write' || name === 'invite';
+    tabbar.hidden = name === 'login' || name === 'write' || name === 'invite' || name === 'sign';
     $$('[data-tab]', tabbar).forEach(function (t) { t.classList.toggle('is-on', t.dataset.tab === name); });
     $$('.app-jump [data-go]', app).forEach(function (c) { c.classList.toggle('is-on', c.dataset.go === name); });
     closeSheet();
@@ -24,7 +24,8 @@
   }
   function setAs(who) {
     state.as = who;
-    $('[data-w-who]', app).textContent = who ? 'Escribes como: ' + who : 'Jue 12 nov';
+    $('[data-w-who]', app).textContent = who ? 'Firmas: ' + who : 'Jue 12 nov';
+    $('[data-w-sign]', app).textContent = who || state.me;
     $('[data-w-send-txt]', app).textContent = who ? 'Enviar a aprobar' : 'Enviar';
     $('.scr-write .w-back', app).dataset.go = who ? 'invite' : 'home';
   }
@@ -52,10 +53,44 @@
       toast('Aprobada · va camino del buzón');
     });
     $('[data-inv-ok]', app).addEventListener('click', function () {
-      go('write'); setAs('la abuela');
-      $('[data-w-edit]', app).textContent = 'Mi niña, cuando tu madre tenía tu edad…';
+      state.signFor = 'guest'; $('[data-sign-step]', app).textContent = 'Antes de escribir';
+      $('[data-sign-input]', app).value = ''; paintSign(); go('sign');
     });
-    if (location.hash === '#tu-lado') show();
+    if (location.hash === '#escritorio') show();
+  }
+
+  /* ---------- La firma: cómo te conoce Lia ---------- */
+  function paintSign() {
+    var v = $('[data-sign-input]', app).value.trim() || 'Tu abuela Tere';
+    $('[data-sign-prev]', app).textContent = v;
+    $('[data-sign-ini]', app).textContent = v.replace(/^(tu|su|mi|el|la)\s+/i, '').charAt(0).toUpperCase() || 'L';
+  }
+  function initSign() {
+    var inp = $('[data-sign-input]', app);
+    inp.addEventListener('input', paintSign);
+    $('[data-sign-sug]', app).addEventListener('click', function (e) {
+      var c = e.target.closest('.chip'); if (!c) return;
+      inp.value = c.textContent; paintSign();
+    });
+    $('[data-sign-me]', app).addEventListener('click', function () {
+      state.signFor = 'me'; $('[data-sign-step]', app).textContent = 'Tu firma';
+      inp.value = state.me; paintSign(); go('sign');
+    });
+    $('[data-sign-ok]', app).addEventListener('click', function () {
+      var v = inp.value.trim();
+      if (!v) { inp.focus(); return toast('Escribe cómo te conoce Lia'); }
+      if (state.signFor === 'me') {
+        var old = state.me; state.me = v;
+        // Tu firma cambia en todas tus cartas de la maqueta.
+        $$('.hand, .ltr-sign, [data-sig-chip]').forEach(function (el) { if (el.children.length === 0 && el.textContent.trim() === old) el.textContent = v; });
+        $('[data-me-ini]', app).textContent = $('[data-sign-ini]', app).textContent;
+        go('home'); toast('Firma guardada · «' + v + '»');
+      } else {
+        go('write'); setAs(v);
+        $('[data-w-edit]', app).textContent = 'Mi niña, cuando tu madre tenía tu edad…';
+        toast('Tus cartas irán firmadas «' + v + '»');
+      }
+    });
   }
 
   /* ---------- Hojas inferiores ---------- */
@@ -229,7 +264,7 @@
   }
 
   function boot() {
-    safe(initNav, 'nav'); safe(initSheets, 'sheets'); safe(initFoto, 'foto'); safe(initAudio, 'audio');
+    safe(initNav, 'nav'); safe(initSign, 'sign'); safe(initSheets, 'sheets'); safe(initFoto, 'foto'); safe(initAudio, 'audio');
     safe(initSendApp, 'send'); safe(initPlan, 'plan'); safe(initSeal, 'seal');
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();

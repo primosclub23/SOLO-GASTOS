@@ -441,7 +441,7 @@
     var ap = $('[data-approve]');
     if (ap) ap.addEventListener('click', function () {
       ap.closest('.pending').classList.add('is-ok');
-      toast('Aprobada · la carta de la abuela va camino del buzón');
+      toast('Aprobada · la carta de tu abuela Tere va camino del buzón');
     });
   }
 

@@ -78,3 +78,15 @@
   .snd svg { width: 15px; height: 15px; }
 }
 @media print { .snd { display: none !important; } }
+
+/* ---------- La firma ---------- */
+.scr-sign .body { margin-bottom: 18px; }
+.sign-input { font-size: 26px; padding: 10px 22px 12px; text-align: center; margin-bottom: 12px; }
+.sign-prev { position: relative; border-radius: 6px; padding: 16px 18px 14px; display: grid; gap: 6px; margin-bottom: 18px; background: linear-gradient(180deg, #FCF9F2, #F1EADC); border: .5px solid rgba(0, 0, 0, .08); box-shadow: var(--shadow-lg); transform: rotate(-1.5deg); }
+.sign-prev .ministamp { position: absolute; right: 14px; top: 12px; }
+.sign-to { font-size: 30px; text-align: center; padding: 14px 0 8px; }
+.sign-from { font-size: 24px; color: var(--accent-dark); border-top: .5px solid var(--border); padding-top: 8px; }
+.sign-from::before { content: 'De: '; font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--hint); }
+.w-sign { text-align: right; font-size: 27px; margin: 6px 0 14px; }
+.me-sig { font-size: 21px !important; font-weight: 400 !important; color: var(--ink); line-height: 1.1; }
+.members .hand { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
