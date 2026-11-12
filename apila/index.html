@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apila · Acumula bitcoin sin estar pegado al gráfico</title>
+<meta name="description" content="Apila es una herramienta de software para acumular bitcoin a largo plazo con un método de reglas públicas: panel, alertas automáticas, calculadora e historial propio. No es asesoramiento financiero.">
+<meta name="theme-color" content="#141310">
+<meta property="og:title" content="Apila · Acumula bitcoin sin estar pegado al gráfico">
+<meta property="og:description" content="Un método de reglas públicas, un panel, alertas automáticas y tu propio historial. Sin señales, sin promesas.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23141310'/%3E%3Crect x='8' y='20' width='16' height='4' rx='1.5' fill='%23F7931A'/%3E%3Crect x='10' y='14' width='12' height='4' rx='1.5' fill='%23F7931A' opacity='.7'/%3E%3Crect x='12' y='8' width='8' height='4' rx='1.5' fill='%23F7931A' opacity='.4'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#141310; --surface:#1E1C18; --elevated:#2A2720;
+  --border:rgba(255,255,255,.08); --border-2:rgba(255,255,255,.14);
+  --text:#F5F0E8; --muted:#A09880; --hint:#7A7060;
+  --accent:#F7931A; --accent-hover:#FFA940; --accent-soft:rgba(247,147,26,.10);
+  --down:#E0705C;
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'Inter',system-ui,-apple-system,sans-serif;
+  --mono:'Space Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+em{font-style:italic}
+::selection{background:var(--accent);color:var(--bg)}
+:focus-visible{outline:1.5px solid var(--accent);outline-offset:3px;border-radius:4px}
+
+/* ── Layout ── */
+.wrap{max-width:1040px;margin:0 auto;padding:0 22px}
+section{padding:84px 0}
+.label{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--hint);display:flex;align-items:center;gap:12px;margin-bottom:26px}
+.label::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.label::after{content:'';flex:1;height:.5px;background:var(--border)}
+h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.01em;color:var(--text)}
+h1 em,h2 em,h3 em{font-weight:400;color:var(--accent)}
+h2{font-size:clamp(30px,5vw,46px);line-height:1.12;max-width:18ch}
+.lead{color:var(--muted);font-size:16px;max-width:56ch;margin-top:18px}
+.head{margin-bottom:44px}
+.mono{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase}
+.card{background:var(--surface);border:.5px solid var(--border);border-radius:12px;padding:28px 24px}
+.grid{display:grid;gap:14px}
+
+/* ── Nav ── */
+nav.top{position:sticky;top:0;z-index:20;background:rgba(20,19,16,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:.5px solid var(--border)}
+nav.top .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--serif);font-weight:700;font-size:20px}
+.brand svg{width:22px;height:22px}
+.nav-link{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;display:flex;gap:8px;align-items:center;padding:10px 0}
+.nav-link::before{content:'✦';font-size:8px;color:var(--accent)}
+.nav-link:hover{color:var(--text)}
+
+/* ── Hero ── */
+.hero{position:relative;padding:72px 0 84px;text-align:center}
+.hero::before{content:'';position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse 70% 60% at 50% 40%,#2A2218 0%,transparent 70%)}
+.badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#C0B8A8;background:rgba(255,255,255,.04);border:.5px solid rgba(255,255,255,.1);border-radius:100px;padding:7px 16px}
+.badge i{width:5px;height:5px;border-radius:50%;background:var(--accent)}
+h1{font-size:clamp(40px,8.5vw,84px);line-height:1.04;margin:28px auto 0;max-width:13ch}
+.hero .lead{margin:24px auto 0;font-size:17px;max-width:50ch}
+
+/* ── Formulario lista de espera ── */
+.wl{margin:36px auto 0;max-width:460px}
+.wl-row{display:flex;flex-direction:column;gap:10px}
+.wl input[type=email]{width:100%;font-family:var(--sans);font-size:16px;font-weight:300;color:var(--text);background:rgba(255,255,255,.04);border:.5px solid var(--border-2);border-radius:100px;padding:15px 22px;outline:none;transition:border-color .2s}
+.wl input[type=email]::placeholder{color:var(--hint)}
+.wl input[type=email]:focus{border-color:var(--accent)}
+.btn{font-family:var(--sans);font-size:15px;font-weight:500;background:var(--accent);color:#141310;border:none;border-radius:100px;padding:15px 26px;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-block;text-align:center;transition:background .2s,transform .2s}
+.btn:hover{background:var(--accent-hover)}
+.btn:active{transform:scale(.98)}
+.btn[disabled]{opacity:.6;cursor:default}
+.btn-ghost{background:transparent;color:var(--text);border:.5px solid var(--border-2)}
+.btn-ghost:hover{background:rgba(255,255,255,.05)}
+.wl-note{margin-top:14px;font-size:12.5px;color:var(--hint)}
+.wl-msg{margin-top:14px;font-size:14px}
+.wl-msg:empty{display:none}
+.wl-msg.ok{color:var(--accent)}
+.wl-msg.err{color:var(--down)}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+
+/* ── Vista de ejemplo del panel ── */
+.demo{margin:56px auto 0;max-width:460px;text-align:left;padding:22px}
+.demo-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;color:var(--hint)}
+.state{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--accent);background:var(--accent-soft);border:.5px solid rgba(247,147,26,.3);border-radius:100px;padding:5px 12px}
+.state i{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.demo dl{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.demo dt{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--hint)}
+.demo dd{font-size:15px;font-weight:400;margin-top:2px;font-variant-numeric:tabular-nums}
+
+/* ── Problema ── */
+.problems{grid-template-columns:1fr}
+.problems .card{display:flex;gap:16px;align-items:flex-start;padding:24px}
+.problems h3{font-family:var(--sans);font-weight:500;font-size:16px;letter-spacing:0}
+.problems p{color:var(--muted);font-size:14.5px;margin-top:4px}
+.ico{width:38px;height:38px;border-radius:10px;background:var(--elevated);border:.5px solid var(--border);display:grid;place-items:center;flex-shrink:0;color:var(--accent)}
+.ico svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Pasos ── */
+.steps{grid-template-columns:1fr}
+.step{position:relative;overflow:hidden;padding:30px 24px 28px}
+.step-num{position:absolute;top:-14px;right:18px;font-family:var(--serif);font-style:italic;font-weight:400;font-size:84px;line-height:1;color:var(--text);opacity:.07;user-select:none}
+.tag{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);border:.5px solid rgba(247,147,26,.25);border-radius:100px;padding:3px 10px;margin-bottom:14px}
+.step h3{font-size:22px;line-height:1.25}
+.step p{color:var(--muted);font-size:14.5px;margin-top:10px}
+.rules{margin-top:14px;grid-template-columns:1fr}
+.rules .card{padding:22px 24px}
+.rules b{font-weight:500;color:var(--text)}
+.rules p{color:var(--muted);font-size:14.5px}
+
+/* ── Simulación ── */
+.sim-tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--bg);background:var(--accent);border-radius:100px;padding:4px 12px;margin-bottom:18px}
+.chart{padding:22px 14px 16px}
+.chart svg{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:8px 20px;padding:0 10px 14px;font-size:13px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:8px}
+.legend i{width:16px;height:2px;border-radius:2px;background:var(--accent)}
+.legend i.h{background:var(--muted)}
+.legend i.d{width:10px;height:10px;background:rgba(224,112,92,.25);border:.5px solid var(--down)}
+.chart-note{font-size:12px;color:var(--hint);padding:12px 10px 0;border-top:.5px solid var(--border);margin-top:8px}
+.stats{grid-template-columns:1fr 1fr;margin-top:14px}
+.stat{padding:22px 20px}
+.stat .v{font-family:var(--serif);font-weight:700;font-size:clamp(22px,2.9vw,32px);line-height:1.1;white-space:nowrap}
+.stat .k{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--hint);margin-bottom:10px}
+.stat .s{font-size:13px;color:var(--muted);margin-top:6px}
+.stat.down{border-color:rgba(224,112,92,.45);background:linear-gradient(180deg,rgba(224,112,92,.08),transparent),var(--surface)}
+.stat.down .v{color:var(--down)}
+.oos{margin-top:14px;display:grid;gap:18px}
+.oos p{color:var(--muted);font-size:14.5px}
+.bars{display:grid;gap:10px}
+.bar{display:grid;grid-template-columns:110px 1fr 56px;gap:12px;align-items:center;font-size:13px;color:var(--muted)}
+.bar div{height:8px;border-radius:8px;background:var(--elevated);overflow:hidden}
+.bar div i{display:block;height:100%;border-radius:8px;background:var(--muted)}
+.bar.a div i{background:var(--accent)}
+.bar b{font-weight:500;color:var(--text);text-align:right;font-variant-numeric:tabular-nums}
+
+/* ── Calculadora ── */
+.calc{padding:26px 22px}
+.calc-in{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:.5px solid var(--border-2);border-radius:14px;padding:6px 20px;margin-top:8px}
+.calc-in:focus-within{border-color:var(--accent)}
+.calc-in span{font-family:var(--serif);font-size:26px;color:var(--hint)}
+.calc-in input{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--text);font-family:var(--serif);font-weight:700;font-size:32px;padding:8px 0;font-variant-numeric:tabular-nums}
+.calc input[type=range]{width:100%;margin-top:20px;accent-color:var(--accent)}
+.split{display:flex;height:10px;border-radius:10px;overflow:hidden;margin:30px 0 8px;gap:3px}
+.split i{background:var(--muted);flex:80}
+.split i+i{background:var(--accent);flex:20}
+.split-l{display:flex;justify-content:space-between;color:var(--hint)}
+.out{grid-template-columns:1fr;margin-top:26px;gap:0}
+.out > div{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:16px 0;border-top:.5px solid var(--border)}
+.out dt{font-size:14.5px;color:var(--muted)}
+.out dt small{display:block;font-size:12.5px;color:var(--hint);line-height:1.5;margin-top:2px}
+.out dd{font-family:var(--serif);font-weight:700;font-size:22px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.out .risk dd{color:var(--down)}
+.calc-note{font-size:12.5px;color:var(--hint);margin-top:22px}
+
+/* ── Incluye ── */
+.feats{grid-template-columns:1fr}
+.feat h3{font-family:var(--sans);font-weight:500;font-size:17px;letter-spacing:0;margin-top:20px}
+.feat p{color:var(--muted);font-size:14.5px;margin-top:8px}
+.custody{border-color:rgba(247,147,26,.3)}
+
+/* ── Planes ── */
+.plans{grid-template-columns:1fr}
+.plan{display:flex;flex-direction:column;padding:30px 24px}
+.plan.main{border-color:rgba(247,147,26,.45)}
+.plan h3{font-size:24px}
+.price{font-family:var(--serif);font-weight:700;font-size:44px;line-height:1;margin:18px 0 6px;font-variant-numeric:tabular-nums}
+.price small{font-family:var(--sans);font-weight:300;font-size:14px;color:var(--muted)}
+.plan ul{list-style:none;margin:22px 0 28px;display:grid;gap:10px;flex:1}
+.plan li{font-size:14.5px;color:var(--muted);padding-left:22px;position:relative}
+.plan li::before{content:'';position:absolute;left:0;top:.62em;width:10px;height:.5px;background:var(--accent)}
+.plans-note{font-size:12.5px;color:var(--hint);margin-top:18px}
+
+/* ── FAQ ── */
+.faq{border-top:.5px solid var(--border)}
+.faq details{border-bottom:.5px solid var(--border)}
+.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:20px;align-items:center;padding:22px 0;font-size:17px;font-weight:400}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:'+';font-family:var(--mono);font-size:18px;color:var(--accent);transition:transform .2s;flex-shrink:0}
+.faq details[open] summary::after{transform:rotate(45deg)}
+.faq p{color:var(--muted);font-size:15px;max-width:64ch;padding:0 0 14px}
+.faq p:last-child{padding-bottom:26px}
+.faq b{font-weight:500;color:var(--text)}
+.legal-q{font-size:13.5px!important;border-left:1.5px solid var(--accent);padding-left:14px!important;margin-bottom:26px}
+
+/* ── CTA final ── */
+.final{text-align:center;padding:100px 0}
+.final h2{margin:0 auto;max-width:16ch}
+.final .lead{margin-left:auto;margin-right:auto}
+
+/* ── Pie ── */
+footer{border-top:.5px solid var(--border);padding:40px 0 56px}
+.legal{font-size:12.5px;line-height:1.75;color:var(--hint);max-width:78ch}
+.legal b{font-family:var(--mono);font-weight:400;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:10px}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin-top:32px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--hint)}
+
+/* ── Aparición suave ── */
+.rv{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
+
+/* ── Tablet / escritorio ── */
+@media (min-width:640px){
+  .wrap{padding:0 32px}
+  .wl-row{flex-direction:row;background:rgba(255,255,255,.04);border:.5px solid var(--border-2);border-radius:100px;padding:6px}
+  .wl-row:focus-within{border-color:var(--accent)}
+  .wl input[type=email]{background:none;border:none;padding:10px 18px}
+  .problems,.feats{grid-template-columns:1fr 1fr}
+  .stats{grid-template-columns:repeat(4,1fr)}
+  .oos{grid-template-columns:1fr 1fr;align-items:center}
+  .calc{padding:40px}
+  .card{padding:32px 28px}
+  .chart{padding:28px 20px 20px}
+}
+@media (min-width:900px){
+  section{padding:120px 0}
+  .hero{padding:110px 0 120px}
+  .head{margin-bottom:60px}
+  .steps,.plans,.rules{grid-template-columns:repeat(3,1fr)}
+  .feats{grid-template-columns:repeat(3,1fr)}
+  .calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+  .out{margin-top:0}
+  .out > div:first-child{border-top:none;padding-top:0}
+  .final{padding:150px 0}
+}
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="wrap">
+    <a class="brand" href="#" aria-label="Apila, inicio">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="21" width="22" height="5" rx="2" fill="#F7931A"/><rect x="8" y="13.5" width="16" height="5" rx="2" fill="#F7931A" opacity=".7"/><rect x="11" y="6" width="10" height="5" rx="2" fill="#F7931A" opacity=".4"/></svg>
+      Apila
+    </a>
+    <a class="nav-link" href="#lista">Lista de espera</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- 1 · HERO -->
+<header class="hero">
+  <div class="wrap">
+    <span class="badge"><i></i>Software · No son señales</span>
+    <h1>Acumula bitcoin sin estar <em>pegado al gráfico</em></h1>
+    <p class="lead">Un método de reglas públicas, un panel que te dice en qué estado está y una alerta cuando cambia. Tú decides y operas en tu exchange. Pocas operaciones al año.</p>
+
+    <form class="wl" data-wl novalidate>
+      <div class="wl-row">
+        <input type="email" name="email" placeholder="tu@correo.com" autocomplete="email" inputmode="email" aria-label="Tu correo electrónico" required>
+        <input class="hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="btn" type="submit">Únete a la lista de espera</button>
+      </div>
+      <p class="wl-msg" role="status" aria-live="polite"></p>
+      <p class="wl-note">Un único correo cuando abramos. Nada más.</p>
+    </form>
+
+    <div class="card demo" aria-label="Vista de ejemplo del panel">
+      <div class="demo-top">
+        <span class="mono">Vista de ejemplo</span>
+        <span class="state"><i></i>DENTRO</span>
+      </div>
+      <dl>
+        <div><dt>Media 50 d</dt><dd>por encima</dd></div>
+        <div><dt>Media 200 d</dt><dd>por encima</dd></div>
+        <div><dt>Último cambio</dt><dd>hace 41 días</dd></div>
+      </dl>
+    </div>
+  </div>
+</header>
+
+<!-- 2 · PROBLEMA -->
+<section id="problema">
+  <div class="wrap">
+    <div class="label">El problema</div>
+    <div class="head rv">
+      <h2>Operar más no es <em>acumular más</em></h2>
+      <p class="lead">La mayoría de la gente que intenta sacar más bitcoin del mercado acaba con menos. Casi siempre por las mismas cuatro razones.</p>
+    </div>
+    <div class="grid problems">
+      <div class="card rv">
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span>
+        <div><h3>Mirar gráficos todo el día</h3><p>Horas de pantalla que no mejoran el resultado y sí empeoran las decisiones.</p></div>
+      </div>
+      <div class="card rv">
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg></span>
+        <div><h3>Operar por impulso</h3><p>Comprar con euforia, vender con miedo. Sin reglas escritas, manda el estado de ánimo.</p></div>
+      </div>
+      <div class="card rv">
+        <span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 15.5l7-7M9 9h.01M15 15h.01"/></svg></span>
+        <div><h3>Comisiones y funding</h3><p>Cada entrada, cada salida y cada día en una posición apalancada tiene un coste. Con muchas operaciones, se come la ganancia.</p></div>
+      </div>
+      <div class="card rv">
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3l9.5 17h-19L12 3z"/><path d="M12 10v4.5M12 17.5h.01"/></svg></span>
+        <div><h3>Liquidaciones</h3><p>Demasiado apalancamiento convierte una caída normal en una pérdida definitiva.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · CÓMO FUNCIONA -->
+<section id="metodo">
+  <div class="wrap">
+    <div class="label">Cómo funciona</div>
+    <div class="head rv">
+      <h2>Tres pasos. Reglas <em>públicas</em></h2>
+      <p class="lead">El método es un barbell de acumulación: una parte grande que no se toca y una parte pequeña que sigue la tendencia. Nada oculto.</p>
+    </div>
+    <div class="grid steps">
+      <div class="card step rv">
+        <span class="step-num">01</span>
+        <span class="tag">Reparte</span>
+        <h3>80 % base, 20 % <em>táctico</em></h3>
+        <p>El bolsillo base es BTC al contado: no se toca y no se puede liquidar. El bolsillo táctico es el único que opera, con apalancamiento moderado (x3) si quieres.</p>
+      </div>
+      <div class="card step rv">
+        <span class="step-num">02</span>
+        <span class="tag">Sigue el estado</span>
+        <h3>Dentro o fuera. <em>Te avisamos</em></h3>
+        <p>Un indicador de tendencia en gráfico diario (medias de 50 y 200 días) marca el estado. El táctico entra con tendencia alcista y sale cuando se rompe. Recibes una alerta cuando cambia.</p>
+      </div>
+      <div class="card step rv">
+        <span class="step-num">03</span>
+        <span class="tag">Apila</span>
+        <h3>El beneficio pasa a <em>BTC real</em></h3>
+        <p>Cada operación ganadora del táctico se convierte en bitcoin al contado. Si pierde, no se rellena con el bolsillo base. Una vez al año se reequilibra al 80/20.</p>
+      </div>
+    </div>
+    <div class="grid rules">
+      <div class="card rv"><p><b>Pausa tras 3 pérdidas seguidas.</b> El táctico se detiene antes de volver a entrar.</p></div>
+      <div class="card rv"><p><b>Apagado tras 5.</b> El bolsillo táctico se apaga. El base sigue intacto.</p></div>
+      <div class="card rv"><p><b>Es un método lento.</b> Pocas operaciones al año, muchas pérdidas pequeñas y pocas ganancias grandes.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · SIMULACIÓN -->
+<section id="simulacion">
+  <div class="wrap">
+    <div class="label">Simulación histórica</div>
+    <div class="head rv">
+      <span class="sim-tag">Simulación · No es una promesa</span>
+      <h2>Qué habría pasado <em>desde 2018</em></h2>
+      <p class="lead">Aplicando las reglas a datos históricos con 20.000 $ iniciales. Es una simulación: el pasado no garantiza nada, y el camino incluyó una caída del 75 %.</p>
+    </div>
+
+    <div class="card chart rv">
+      <div class="legend">
+        <span><i></i>Apila (simulación)</span>
+        <span><i class="h"></i>Solo mantener</span>
+        <span><i class="d"></i>Caída máxima del valor en $</span>
+      </div>
+      <svg id="chart" role="img" aria-label="Gráfica de la simulación: BTC acumulados con Apila, de 2,00 a 3,20 BTC, frente a 2,00 BTC solo manteniendo, con la caída máxima del 75 % marcada en 2018."></svg>
+      <p class="chart-note">BTC acumulados, 2018 → 2026. Los valores inicial y final proceden de la simulación; el trazado intermedio es esquemático. La franja marca 2018, cuando el valor en dólares de la cartera simulada llegó a caer un 75 %.</p>
+    </div>
+
+    <div class="grid stats">
+      <div class="card stat rv"><div class="k">BTC acumulados</div><div class="v">3,20</div><div class="s">frente a 2,00 solo manteniendo</div></div>
+      <div class="card stat rv"><div class="k">Valor simulado</div><div class="v">298.000 $</div><div class="s">aprox., desde 20.000 $ iniciales</div></div>
+      <div class="card stat rv"><div class="k">Anual compuesto</div><div class="v">+35 %</div><div class="s">aprox., media de todo el periodo</div></div>
+      <div class="card stat down rv"><div class="k">Caída máxima</div><div class="v">−75 %</div><div class="s">en 2018. Forma parte del método.</div></div>
+    </div>
+
+    <div class="card oos rv">
+      <div>
+        <span class="tag">Desde 2023 · Datos no usados para diseñarlo</span>
+        <p>El método se diseñó con datos anteriores a 2023. En el periodo posterior, la simulación da estos rendimientos anuales. Sigue siendo una simulación, sobre un periodo corto y favorable.</p>
+      </div>
+      <div class="bars">
+        <div class="bar a"><span>Apila</span><div><i style="width:100%"></i></div><b>+59 %</b></div>
+        <div class="bar"><span>Solo mantener</span><div><i style="width:79.7%"></i></div><b>+47 %</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · CALCULADORA -->
+<section id="calculadora">
+  <div class="wrap">
+    <div class="label">Calculadora del barbell</div>
+    <div class="head rv">
+      <h2>Haz números con <em>tu capital</em></h2>
+      <p class="lead">Mira cómo quedaría el reparto y cuánto pones realmente en riesgo antes de mover un solo euro.</p>
+    </div>
+    <div class="card calc rv">
+      <div class="calc-grid">
+        <div>
+          <label class="mono" for="cap" style="color:var(--hint)">Tu capital</label>
+          <div class="calc-in"><span>$</span><input id="cap" type="text" inputmode="numeric" value="2.000" autocomplete="off" aria-describedby="calc-note"></div>
+          <input id="cap-r" type="range" min="100" max="50000" step="100" value="2000" aria-label="Ajustar capital">
+          <div class="split" aria-hidden="true"><i></i><i></i></div>
+          <div class="split-l mono"><span>Base 80 %</span><span style="color:var(--accent)">Táctico 20 %</span></div>
+          <p class="calc-note" id="calc-note">Con x3, una caída de aproximadamente un 33 % desde el precio de entrada liquida la posición del táctico. El bolsillo base no se puede liquidar, pero su valor en dólares sube y baja con el precio de bitcoin. Cálculo orientativo, sin comisiones ni funding.</p>
+        </div>
+        <dl class="grid out">
+          <div><dt>Bolsillo base<small>BTC al contado. No se toca.</small></dt><dd id="o-base">1.600 $</dd></div>
+          <div><dt>Bolsillo táctico<small>Lo único que opera.</small></dt><dd id="o-tac" style="color:var(--accent)">400 $</dd></div>
+          <div><dt>Exposición con x3<small>Tamaño de la posición del táctico.</small></dt><dd id="o-exp">1.200 $</dd></div>
+          <div><dt>Exposición total a BTC<small>Base + táctico x3, cuando está DENTRO.</small></dt><dd id="o-tot">2.800 $</dd></div>
+          <div class="risk"><dt>Riesgo máximo del táctico<small>Lo que puedes perder por liquidación u operaciones perdedoras: el táctico entero.</small></dt><dd id="o-risk">400 $</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · QUÉ INCLUYE -->
+<section id="incluye">
+  <div class="wrap">
+    <div class="label">Qué incluye</div>
+    <div class="head rv">
+      <h2>Todo lo necesario, <em>nada más</em></h2>
+    </div>
+    <div class="grid feats">
+      <div class="card feat rv">
+        <span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M7 15l3-3 2.5 2.5L17 10"/></svg></span>
+        <h3>Panel en tiempo real</h3>
+        <p>Estado del método (DENTRO o FUERA del mercado), niveles clave y fecha del último cambio.</p>
+      </div>
+      <div class="card feat rv">
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 0112 0c0 6 2.5 7 2.5 7h-17S6 15 6 9z"/><path d="M10 20a2 2 0 004 0"/></svg></span>
+        <h3>Alertas automáticas</h3>
+        <p>Por Telegram o email cuando cambia el estado. El resto del tiempo, silencio.</p>
+      </div>
+      <div class="card feat rv">
+        <span class="ico"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7.5h7M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/></svg></span>
+        <h3>Calculadora del barbell</h3>
+        <p>Metes tu capital y ves el reparto 80/20, la exposición con x3 y el riesgo máximo.</p>
+      </div>
+      <div class="card feat rv">
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M5 4.5A1.5 1.5 0 016.5 3H19v15H6.5A1.5 1.5 0 005 19.5v-15z"/><path d="M5 19.5A1.5 1.5 0 006.5 21H19M9 8h6M9 12h4"/></svg></span>
+        <h3>Diario e historial personal</h3>
+        <p>Registra tus operaciones y mide cuántos BTC has acumulado frente a solo mantener.</p>
+      </div>
+      <div class="card feat rv">
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.500 14 5 12 6.500z"/><path d="M12 6.5v13"/></svg></span>
+        <h3>Guía del método</h3>
+        <p>Las reglas completas, la gestión del riesgo y los errores típicos, explicados sin jerga.</p>
+      </div>
+      <div class="card feat custody rv">
+        <span class="ico"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span>
+        <h3>Tus fondos, en tu exchange</h3>
+        <p>Tú decides y operas en tu propio exchange. <span style="color:var(--accent)">Apila nunca toca tus fondos.</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 · PLANES -->
+<section id="planes">
+  <div class="wrap">
+    <div class="label">Planes</div>
+    <div class="head rv">
+      <h2>Empieza gratis. Paga solo si <em>te sirve</em></h2>
+    </div>
+    <div class="grid plans">
+      <div class="card plan rv">
+        <span class="mono" style="color:var(--hint)">Para empezar</span>
+        <h3>Gratis</h3>
+        <div class="price">0 €</div>
+        <ul><li>Guía básica del método</li><li>Calculadora del barbell</li></ul>
+        <a class="btn btn-ghost" href="#lista">Apuntarme</a>
+      </div>
+      <div class="card plan main rv">
+        <span class="mono" style="color:var(--accent)">El producto</span>
+        <h3>Panel</h3>
+        <div class="price">19 € <small>/ mes</small></div>
+        <ul><li>Panel en tiempo real</li><li>Alertas automáticas por Telegram o email</li><li>Diario e historial personal</li><li>Todo lo del plan Gratis</li></ul>
+        <a class="btn" href="#lista">Apuntarme</a>
+      </div>
+      <div class="card plan rv">
+        <span class="mono" style="color:var(--hint)">Para profundizar</span>
+        <h3>Guía</h3>
+        <div class="price">49 € <small>/ mes</small></div>
+        <ul><li>Todo lo del plan Panel</li><li>Guía completa del método</li><li>Sesiones o actualizaciones del método</li></ul>
+        <a class="btn btn-ghost" href="#lista">Apuntarme</a>
+      </div>
+    </div>
+    <p class="plans-note">Precios orientativos, sin IVA. Pueden cambiar antes del lanzamiento. Apuntarte a la lista no te compromete a nada.</p>
+  </div>
+</section>
+
+<!-- 8 · FAQ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="label">Preguntas honestas</div>
+    <div class="head rv">
+      <h2>Lo que conviene saber <em>antes</em></h2>
+    </div>
+    <div class="faq rv">
+      <details>
+        <summary>¿Es asesoramiento financiero?</summary>
+        <p><b>No.</b> Apila es software: un panel, alertas, una calculadora y un diario alrededor de un método de reglas públicas. No conoce tu situación personal y no te dice qué hacer con tu dinero. No es un servicio de señales.</p>
+        <p class="legal-q">Apila es una herramienta educativa y de software. No es asesoramiento financiero ni una recomendación personalizada de inversión. Los resultados mostrados son simulaciones históricas que no garantizan resultados futuros. Invertir en criptoactivos, y especialmente con apalancamiento, conlleva un alto riesgo de pérdida, incluida la pérdida total del capital invertido.</p>
+      </details>
+      <details>
+        <summary>¿Puedo perder dinero?</summary>
+        <p><b>Sí.</b> El bolsillo táctico puede perderse entero, sobre todo si usas apalancamiento. El bolsillo base no se liquida, pero su valor baja cuando baja bitcoin. En la simulación histórica, la cartera llegó a valer un 75 % menos. Usa solo dinero que puedas permitirte perder.</p>
+      </details>
+      <details>
+        <summary>¿Por qué hay años malos?</summary>
+        <p>Porque un método de tendencia gana poco a menudo y pierde poco muchas veces. En mercados laterales, el indicador entra y sale sin encontrar tendencia y encadena pérdidas pequeñas. Y cuando bitcoin cae con fuerza, el 80 % base cae con él. Las reglas de pausa y apagado limitan el daño del táctico, no lo evitan.</p>
+      </details>
+      <details>
+        <summary>¿Qué exchange uso?</summary>
+        <p>El que quieras. Apila no se conecta a tu cuenta, no pide claves y no ejecuta órdenes. Te muestra el estado del método y tú operas donde ya lo hagas.</p>
+      </details>
+      <details>
+        <summary>¿Qué pasa si el bitcoin cae un 70 %?</summary>
+        <p>Que tu cartera cae casi lo mismo. El método no protege de las caídas de bitcoin: el 80 % está siempre en BTC al contado. Lo normal es que el táctico ya esté fuera, porque la tendencia se habría roto antes, pero el bolsillo base lo sufre entero. Ya pasó en la simulación (−75 % en 2018) y puede volver a pasar. Apila está pensado para quien quiere acumular bitcoin a largo plazo y acepta esa volatilidad.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- 9 · LISTA DE ESPERA -->
+<section class="final" id="lista">
+  <div class="wrap">
+    <h2 class="rv">Apila con reglas, <em>no con impulsos</em></h2>
+    <p class="lead rv">Déjanos tu correo y te avisamos cuando abramos. Sin prisa: el método es lento y nosotros también.</p>
+    <form class="wl rv" data-wl novalidate>
+      <div class="wl-row">
+        <input type="email" name="email" placeholder="tu@correo.com" autocomplete="email" inputmode="email" aria-label="Tu correo electrónico" required>
+        <input class="hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="btn" type="submit">Únete a la lista de espera</button>
+      </div>
+      <p class="wl-msg" role="status" aria-live="polite"></p>
+      <p class="wl-note">Un único correo cuando abramos. Puedes pedir que borremos tu dirección en cualquier momento.</p>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<!-- 10 · AVISO LEGAL -->
+<footer>
+  <div class="wrap">
+    <p class="legal"><b>Aviso legal</b>Apila es una herramienta educativa y de software. No es asesoramiento financiero ni una recomendación personalizada de inversión. Los resultados mostrados son simulaciones históricas que no garantizan resultados futuros. Invertir en criptoactivos, y especialmente con apalancamiento, conlleva un alto riesgo de pérdida, incluida la pérdida total del capital invertido.</p>
+    <div class="foot"><span>© 2026 · Apila</span><span>Software, no señales</span></div>
+  </div>
+</footer>
+
+<script>
+// ► Endpoint de la lista de espera (p. ej. Formspree: https://formspree.io/f/xxxxxxxx).
+//   Mientras esté vacío, la página NO recoge correos y lo dice al enviar.
+const WAITLIST_ENDPOINT = '';
+
+// ► Serie de la gráfica: [año, BTC acumulados con Apila]. Solo el primer y el último valor
+//   proceden de la simulación; los intermedios son esquemáticos. Sustituir por la serie real.
+const SERIE_APILA = [[2018,2.00],[2019,2.00],[2020,2.14],[2021,2.52],[2022,2.74],[2023,2.74],[2024,2.90],[2025,3.08],[2026,3.20],[2026.85,3.20]];
+const BTC_MANTENER = 2.00;
+
+const fmt = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+/* ── Gráfica ── */
+(function () {
+  const svg = document.getElementById('chart');
+  let narrow = null;
+  function draw() {
+  const n = svg.getBoundingClientRect().width < 520;
+  if (n === narrow) return; narrow = n;
+  const W = n ? 400 : 720, H = n ? 320 : 340;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const m = {l: n ? 34 : 44, r: n ? 58 : 78, t: 18, b: 34};
+  const x0 = 2018, x1 = SERIE_APILA[SERIE_APILA.length - 1][0], y0 = 1.6, y1 = 3.4;
+  const X = v => m.l + (v - x0) / (x1 - x0) * (W - m.l - m.r);
+  const Y = v => H - m.b - (v - y0) / (y1 - y0) * (H - m.t - m.b);
+  let s = '';
+  // Franja de la caída máxima (2018)
+  s += `<rect x="${X(2018)}" y="${m.t}" width="${X(2019) - X(2018)}" height="${H - m.t - m.b}" fill="#E0705C" opacity=".12"/>`;
+  s += `<line x1="${X(2019)}" x2="${X(2019)}" y1="${m.t}" y2="${H - m.b}" stroke="#E0705C" stroke-width=".75" stroke-dasharray="3 4" opacity=".7"/>`;
+  s += `<text x="${X(2019) + 9}" y="${m.t + 22}" fill="#E0705C" font-family="Playfair Display,serif" font-weight="700" font-size="20">−75 %</text>`;
+  s += `<text x="${X(2019) + 9}" y="${m.t + 38}" fill="#E0705C" font-family="Space Mono,monospace" font-size="9" letter-spacing=".5">VALOR EN $</text>`;
+  // Rejilla y eje Y
+  for (const v of [2, 2.5, 3]) {
+    s += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="rgba(255,255,255,.07)" stroke-width=".5"/>`;
+    s += `<text x="${m.l - 10}" y="${Y(v) + 4}" text-anchor="end" fill="#7A7060" font-family="Space Mono,monospace" font-size="10">${v.toFixed(1).replace('.', ',')}</text>`;
+  }
+  // Eje X
+  for (let a = 2018; a <= 2026; a += 2)
+    s += `<text x="${X(a)}" y="${H - 10}" text-anchor="${a === 2018 ? 'start' : 'middle'}" fill="#7A7060" font-family="Space Mono,monospace" font-size="10">${a}</text>`;
+  // Solo mantener
+  s += `<line x1="${X(x0)}" x2="${X(x1)}" y1="${Y(BTC_MANTENER)}" y2="${Y(BTC_MANTENER)}" stroke="#A09880" stroke-width="2" stroke-linecap="round"/>`;
+  // Apila (escalonada: el BTC se suma al cerrar operaciones ganadoras)
+  let d = '', area = '';
+  SERIE_APILA.forEach(([a, v], i) => {
+    d += i ? ` H${X(a)} V${Y(v)}` : `M${X(a)} ${Y(v)}`;
+  });
+  area = d + ` V${Y(BTC_MANTENER)} H${X(x0)} Z`;
+  s += `<path d="${area}" fill="#F7931A" opacity=".08"/>`;
+  s += `<path d="${d}" fill="none" stroke="#F7931A" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+  // Etiquetas finales
+  const end = SERIE_APILA[SERIE_APILA.length - 1][1];
+  s += `<circle cx="${X(x1)}" cy="${Y(end)}" r="4" fill="#F7931A" stroke="#1E1C18" stroke-width="2"/>`;
+  s += `<text x="${X(x1) + 10}" y="${Y(end) + 2}" fill="#F7931A" font-family="Playfair Display,serif" font-weight="700" font-size="17">3,20</text>`;
+  s += `<text x="${X(x1) + 10}" y="${Y(end) + 16}" fill="#F7931A" font-family="Space Mono,monospace" font-size="9">BTC</text>`;
+  s += `<circle cx="${X(x1)}" cy="${Y(BTC_MANTENER)}" r="4" fill="#A09880" stroke="#1E1C18" stroke-width="2"/>`;
+  s += `<text x="${X(x1) + 10}" y="${Y(BTC_MANTENER) + 2}" fill="#A09880" font-family="Playfair Display,serif" font-weight="700" font-size="17">2,00</text>`;
+  s += `<text x="${X(x1) + 10}" y="${Y(BTC_MANTENER) + 16}" fill="#A09880" font-family="Space Mono,monospace" font-size="9">BTC</text>`;
+  svg.innerHTML = s;
+  }
+  draw(); addEventListener('resize', draw);
+})();
+
+/* ── Calculadora ── */
+(function () {
+  const cap = document.getElementById('cap'), rng = document.getElementById('cap-r');
+  const $ = id => document.getElementById(id);
+  function paint(n) {
+    $('o-base').textContent = fmt(n * .8) + ' $';
+    $('o-tac').textContent = fmt(n * .2) + ' $';
+    $('o-exp').textContent = fmt(n * .6) + ' $';
+    $('o-tot').textContent = fmt(n * 1.4) + ' $';
+    $('o-risk').textContent = fmt(n * .2) + ' $';
+  }
+  cap.addEventListener('input', () => {
+    const n = Math.min(parseInt(cap.value.replace(/\D/g, ''), 10) || 0, 999999999);
+    cap.value = n ? fmt(n) : '';
+    rng.value = Math.min(Math.max(n, +rng.min), +rng.max);
+    paint(n);
+  });
+  rng.addEventListener('input', () => { cap.value = fmt(+rng.value); paint(+rng.value); });
+  paint(2000);
+})();
+
+/* ── Lista de espera ── */
+document.querySelectorAll('[data-wl]').forEach(form => {
+  const msg = form.querySelector('.wl-msg'), btn = form.querySelector('button'), inp = form.querySelector('input[type=email]');
+  const say = (t, c) => { msg.textContent = t; msg.className = 'wl-msg ' + (c || ''); };
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const email = inp.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { say('Revisa el correo: no parece válido.', 'err'); inp.focus(); return; }
+    if (form.querySelector('.hp').value) return;
+    if (!WAITLIST_ENDPOINT) { say('La lista de espera todavía no está conectada. Tu correo no se ha guardado.', 'err'); return; }
+    btn.disabled = true; say('Enviando…');
+    try {
+      const r = await fetch(WAITLIST_ENDPOINT, {method: 'POST', headers: {'Accept': 'application/json', 'Content-Type': 'application/json'}, body: JSON.stringify({email, origen: 'apila-lista-de-espera'})});
+      if (!r.ok) throw 0;
+      form.reset(); say('Hecho. Te escribiremos cuando abramos.', 'ok');
+    } catch (_) {
+      say('No se ha podido enviar. Inténtalo de nuevo en un momento.', 'err');
+    }
+    btn.disabled = false;
+  });
+});
+
+/* ── Aparición suave ── */
+(function () {
+  const els = document.querySelectorAll('.rv');
+  if (!('IntersectionObserver' in window)) { els.forEach(e => e.classList.add('in')); return; }
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), {rootMargin: '0px 0px -8% 0px'});
+  els.forEach(e => io.observe(e));
+})();
+</script>
+</body>
+</html>

@@ -148,3 +148,13 @@ Al subir cambios, ejecutar `python3 scripts/subir_version.py`: sube a la vez `VE
 ## 7. Pendiente / ideas
 
 Ver la ficha del proyecto en `Cerebro/proyectos/solo-gastos.md`.
+
+## Landing de APILA (`apila/`, 2026-11-12)
+
+Producto distinto de SOLO GASTOS; vive aquí solo para publicarse con GitHub Pages en `/apila/`.
+
+- `apila/index.html` único y autocontenido (HTML + CSS + JS vanilla; solo carga Google Fonts). Estilo editorial oscuro con acento naranja bitcoin (`--accent:#F7931A`).
+- **Lista de espera:** constante `WAITLIST_ENDPOINT` al principio del `<script>`. Está **vacía**: mientras lo esté, el formulario no guarda correos y lo avisa al enviar. No reutilizar el endpoint de SOLO GASTOS (mezclaría las listas).
+- **Gráfica de la simulación:** SVG generado desde `SERIE_APILA` (`[año, BTC]`). Solo el primer y el último valor (2,00 → 3,20 BTC) vienen de la simulación; los intermedios son esquemáticos y la nota al pie lo dice. Sustituir por la serie real cuando esté.
+- **Calculadora:** base 80 %, táctico 20 %, exposición x3 = 60 % del capital, exposición total = 140 %, riesgo máximo = el táctico entero.
+- El aviso legal obligatorio va literal en el pie y en la primera pregunta de la FAQ. Cifras de simulación siempre etiquetadas como simulación y con la caída del −75 % visible.
