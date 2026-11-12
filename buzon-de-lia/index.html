@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261112">
+  <link rel="stylesheet" href="styles.css?v=20261112b">
 </head>
 <body>
 
@@ -31,6 +31,7 @@
     <nav class="nav-links">
       <a href="#escribir">Escribir</a>
       <a href="#cartas">Las cartas</a>
+      <a href="#vista-lia" data-lia-open>Vista de Lia</a>
       <a href="#familia">La familia</a>
       <a href="#siempre">Para siempre</a>
     </nav>
@@ -267,6 +268,7 @@
         <p class="label section-label">La parte de Lia</p>
         <h2 class="title-lg">Todas sus cartas, <em>esperándola</em></h2>
         <p class="body">Ordenadas por fecha, por tema y por quién las escribió. Las que llevan candado siguen cerradas hasta su día.</p>
+        <button class="btn-solid lia-open-btn" type="button" data-lia-open>Entrar como entra Lia →</button>
       </div>
 
       <div class="filters reveal">
@@ -289,7 +291,7 @@
       </div>
 
       <div class="grid" data-grid>
-        <article class="card" data-tema="aprendido" data-de="yo" tabindex="0">
+        <article class="card" data-tema="aprendido" data-de="yo" data-pol="ph-cake|hoy, 08:20" tabindex="0">
           <div class="card-top"><span class="label">12 nov 2026</span><span class="ministamp">L</span></div>
           <h3>Equivocarse es el <em>camino</em></h3>
           <p class="card-ex">Hoy he pensado en ti toda la mañana. Quería contarte una cosa que tardé muchos años en entender…</p>
@@ -414,6 +416,119 @@
     <span>Hecho con calma, para que dure</span>
   </footer>
 
+  <!-- VISTA DE LIA: su entrada y su buzón -->
+  <div class="lia" data-lia hidden>
+    <div class="lia-bar">
+      <span class="nav-brand"><span class="nav-avatar">L</span><span class="nav-name">Mi buzón</span></span>
+      <button class="btn-ghost" type="button" data-lia-exit>← Salir de la vista de Lia</button>
+    </div>
+
+    <!-- Su puerta -->
+    <div class="gate" data-lia-gate>
+      <div class="gate-box">
+        <div class="gate-in">
+          <div class="envm envm-s g1"><i class="envm-seal"></i></div>
+          <div class="envm envm-s g2"><i class="envm-seal"></i></div>
+          <div class="envm envm-s g3"><i class="envm-seal"></i></div>
+        </div>
+        <div class="gate-door"><span class="mbx-plate">Lia</span><i class="gate-key"></i></div>
+      </div>
+      <p class="label">elbuzondelia.com · solo para ti</p>
+      <h2 class="title-lg">Hola, <em>Lia</em></h2>
+      <p class="hand gate-hand">Este buzón es tuyo. Dentro están todas tus cartas.</p>
+      <form class="invite gate-form" data-lia-form>
+        <input class="gate-input" type="password" placeholder="Tu palabra secreta" aria-label="Tu palabra secreta" autocomplete="off">
+        <button class="btn-solid" type="submit">Abrir mi buzón</button>
+      </form>
+      <ul class="gate-notes">
+        <li><b>Su propia llave</b><span>Entra con su correo y una palabra que solo sabe ella. Distinta de la tuya.</span></li>
+        <li><b>Solo leer</b><span>Puede leer, escuchar e imprimir. No puede borrar ni cambiar nada.</span></li>
+        <li><b>Cuando tú decidas</b><span>Tú eliges el día que le das la llave. Hasta entonces, el buzón se va llenando.</span></li>
+      </ul>
+    </div>
+
+    <!-- Su buzón por dentro -->
+    <div class="lhome" data-lia-home hidden>
+      <header class="lhome-head">
+        <p class="label section-label">Jueves · 12 de noviembre de 2026</p>
+        <h2 class="title-xl">Buenos días, <em>Lia</em></h2>
+        <p class="hand lhome-hand">Hoy te ha llegado una carta nueva.</p>
+      </header>
+
+      <section class="lnew">
+        <article class="card lnew-env" data-de="yo" data-pol="ph-cake|hoy, 08:20" tabindex="0">
+          <div class="card-top"><span class="label">Hoy · sin abrir</span><span class="ministamp">L</span></div>
+          <h3 hidden>Equivocarse es el camino</h3>
+          <p class="hand lnew-to">Para Lia</p>
+          <div class="env-seal lnew-seal"><span>L</span></div>
+          <div class="card-foot"><span class="hand">Quien más te quiere</span><span class="label">Lo que he aprendido</span></div>
+          <div class="card-body" hidden><p>Querida Lia:</p><p>Hoy he pensado en ti toda la mañana. Quería contarte una cosa que tardé muchos años en entender: equivocarse no es lo contrario de hacerlo bien. Es el camino.</p><p>Las cosas que mejor me han salido en la vida empezaron saliendo mal. Así que cuando falles, y fallarás, no te escondas. Mira lo que ha pasado, ríete un poco y vuelve a intentarlo.</p></div>
+        </article>
+        <div class="lnew-copy">
+          <span class="step-badge">Carta nueva</span>
+          <h3 class="title-lg">Toca el sobre para <em>abrirla</em></h3>
+          <p class="body">El sobre se abre, la carta sale y se desdobla. Dentro va escrita a mano, con su foto y, si la hay, la voz de quien te la escribió.</p>
+          <div class="lstats">
+            <div><span class="num">8</span><span class="label">cartas en tu buzón</span></div>
+            <div><span class="num">4</span><span class="label">personas te escriben</span></div>
+            <div><span class="num">3</span><span class="label">esperan su día</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lblock">
+        <p class="label section-label">Para un día así</p>
+        <h3 class="title-lg">¿Cómo estás <em>hoy</em>?</h3>
+        <p class="body">Hay cartas guardadas para momentos concretos. Tú decides cuándo abrirlas. Cada una se abre una sola vez.</p>
+        <div class="grid lmoments">
+          <article class="card is-locked" data-lock="momento" tabindex="0">
+            <div class="card-top"><span class="label">Te espera</span></div>
+            <div class="wax"><svg viewBox="0 0 24 24"><rect x="6" y="10.5" width="12" height="9" rx="1.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg></div>
+            <h3>Cuando estés <em>triste</em></h3>
+            <p class="card-ex">Para un día que pese.</p>
+            <div class="card-foot"><span class="hand">Quien más te quiere</span><span class="label">Se abre en un momento</span></div>
+            <div class="card-body" hidden><p>Mi vida:</p><p>Si estás leyendo esto es que hoy pesa. No voy a decirte que no pasa nada, porque sí pasa. Pero te conozco desde antes de que tuvieras nombre, y sé de qué estás hecha.</p><p>Respira. Come algo. Llama a alguien que te quiera. Mañana seguimos.</p></div>
+          </article>
+          <article class="card is-locked" data-lock="momento" tabindex="0">
+            <div class="card-top"><span class="label">Te espera</span></div>
+            <div class="wax"><svg viewBox="0 0 24 24"><rect x="6" y="10.5" width="12" height="9" rx="1.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg></div>
+            <h3>Cuando me eches de <em>menos</em></h3>
+            <p class="card-ex">Para cuando yo no esté cerca.</p>
+            <div class="card-foot"><span class="hand">Quien más te quiere</span><span class="label">Se abre en un momento</span></div>
+            <div class="card-body" hidden><p>Lia:</p><p>Yo también te echo de menos, esté donde esté. Pon la canción que cantábamos en el coche, la que te daba vergüenza. Cántala fuerte.</p><p>Estoy en todo lo que te enseñé. Mira bien y me verás.</p></div>
+          </article>
+          <article class="card is-locked" data-lock="momento" tabindex="0">
+            <div class="card-top"><span class="label">Te espera</span></div>
+            <div class="wax"><svg viewBox="0 0 24 24"><rect x="6" y="10.5" width="12" height="9" rx="1.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg></div>
+            <h3>Cuando tengas <em>miedo</em></h3>
+            <p class="card-ex">Para antes de algo grande.</p>
+            <div class="card-foot"><span class="hand">Quien más te quiere</span><span class="label">Se abre en un momento</span></div>
+            <div class="card-body" hidden><p>Valiente:</p><p>El miedo no significa que no debas hacerlo. Casi siempre significa que te importa. Yo he tenido miedo antes de todo lo bueno que me ha pasado, tú incluida.</p><p>Hazlo con miedo. Luego me lo cuentas.</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="lblock">
+        <p class="label section-label">Tu libro</p>
+        <h3 class="title-lg">Todas tus cartas, <em>año a año</em></h3>
+        <div class="chips chips-who lwho" data-lia-who>
+          <button class="chip is-on" type="button" data-v="*">De todos</button>
+          <button class="chip" type="button" data-v="yo">De quien más te quiere</button>
+          <button class="chip" type="button" data-v="papa">De papá</button>
+          <button class="chip" type="button" data-v="abuela">De la abuela</button>
+          <button class="chip" type="button" data-v="primos">De los primos</button>
+        </div>
+        <div class="lyear"><span class="lyear-num">2026</span><span class="label">El año que empezó tu buzón</span></div>
+        <div class="grid" data-lia-grid></div>
+        <div class="lyear lyear-next"><span class="lyear-num">2027</span><span class="label">Todavía por escribir</span></div>
+        <div class="lbook">
+          <div><p class="promo-label label">Tu libro</p><h3 class="title-sm">Todas las cartas en un <em>PDF</em>, listo para imprimir</h3></div>
+          <button class="btn-solid" type="button" data-lia-book>Descargar mi libro</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
   <!-- Modal de lectura -->
   <div class="modal" data-modal hidden>
     <div class="modal-bg" data-close></div>
@@ -440,6 +555,6 @@
   <div class="sending" data-sending hidden aria-hidden="true"><div class="send-wrap" data-sending-wrap></div></div>
   <div class="toast" data-toast role="status" hidden></div>
 
-  <script defer src="main.js?v=20261112"></script>
+  <script defer src="main.js?v=20261112b"></script>
 </body>
 </html>

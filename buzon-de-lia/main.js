@@ -143,7 +143,7 @@
 
     o.pack.style.transform = 'translateY(' + (f * 330) + 'px) rotate(' + (Math.sin(f * Math.PI) * -5) + 'deg) scale(' + (1 - .5 * clamp(f * 1.8)) + ')';
 
-    var m = ease(seg(p, .56, .2));
+    var m = o.noBox ? 0 : ease(seg(p, .56, .2));
     o.mbB.style.opacity = o.mbF.style.opacity = clamp(m * 1.6);
     o.mbB.style.transform = o.mbF.style.transform = 'translateY(' + ((1 - m) * 120) + 'px)';
     o.flag.style.transform = 'rotate(' + (g > .2 ? 0 : 90) + 'deg)';
@@ -312,6 +312,13 @@
     var current = null;
     function showLetter(card) {
       box.innerHTML = '';
+      if (card.dataset.pol) {
+        var pp = card.dataset.pol.split('|'), fig = document.createElement('figure');
+        fig.className = 'polaroid polaroid-s m-pol';
+        var ph = document.createElement('div'); ph.className = 'ph ' + pp[0];
+        var cap = document.createElement('figcaption'); cap.textContent = pp[1] || '';
+        fig.appendChild(ph); fig.appendChild(cap); box.appendChild(fig);
+      }
       var body = $('.card-body', card);
       if (body) Array.prototype.forEach.call(body.children, function (p) { box.appendChild(p.cloneNode(true)); });
       var sign = document.createElement('p'); sign.className = 'm-sign'; sign.textContent = $('.card-foot .hand', card).textContent;
@@ -331,13 +338,16 @@
           : 'Todavía no es el día. Esta carta se abrirá sola cuando llegue su fecha.';
         $('[data-break]').hidden = !isMoment;
         if (!isMoment) { card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake'); }
+      } else if (card.closest('[data-lia]')) {
+        // En la vista de Lia, el sobre se abre antes de leer.
+        return playOpen(function () { showLetter(card); card.classList.add('is-read'); modal.hidden = false; document.documentElement.style.overflow = 'hidden'; });
       } else showLetter(card);
       modal.hidden = false; document.documentElement.style.overflow = 'hidden';
     }
-    function close() { modal.hidden = true; document.documentElement.style.overflow = ''; current = null; }
+    function close() { modal.hidden = true; document.documentElement.style.overflow = $('[data-lia]').hidden ? '' : 'hidden'; current = null; }
 
-    grid.addEventListener('click', function (e) { var c = e.target.closest('.card'); if (c) open(c); });
-    grid.addEventListener('keydown', function (e) { if (e.key === 'Enter') { var c = e.target.closest('.card'); if (c) open(c); } });
+    document.addEventListener('click', function (e) { var c = e.target.closest('.card'); if (c) open(c); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('card')) open(e.target); });
     modal.addEventListener('click', function (e) {
       if (e.target.closest('[data-close]')) return close();
       if (e.target.closest('[data-break]') && current) {
@@ -349,6 +359,68 @@
       if (e.target.closest('[data-print]')) { try { window.print(); } catch (err) { /* vista previa sin impresión */ } }
     });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !modal.hidden) close(); });
+  }
+
+  /* ---------- Abrir un sobre: la escena al revés ---------- */
+  var opening = false;
+  function playOpen(cb) {
+    var ov = $('[data-sending]'), wrap = $('[data-sending-wrap]'), src = $('[data-send]');
+    if (opening || !ov || !src) return cb();
+    opening = true;
+    wrap.innerHTML = '';
+    var stage = src.cloneNode(true); stage.removeAttribute('data-send'); wrap.appendChild(stage);
+    wrap.style.setProperty('--s', clamp(Math.min((vh - 60) / 690, (vw - 40) / 340), .4, 1.1).toFixed(3));
+    var parts = sceneParts(stage); parts.noBox = true;
+    var from = .76, to = .02, dur = 2600, t0 = null;
+    renderScene(parts, from);
+    ov.classList.remove('is-out'); ov.hidden = false;
+    function step(ts) {
+      if (t0 === null) t0 = ts;
+      var t = clamp((ts - t0) / dur);
+      renderScene(parts, from + (to - from) * t);
+      if (t < 1) return requestAnimationFrame(step);
+      setTimeout(function () {
+        ov.classList.add('is-out'); cb();
+        setTimeout(function () { ov.hidden = true; opening = false; }, 600);
+      }, 350);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* ---------- Vista de Lia ---------- */
+  function initLia() {
+    var lia = $('[data-lia]'), gate = $('[data-lia-gate]'), home = $('[data-lia-home]'), form = $('[data-lia-form]');
+    if (!lia) return;
+    // Su libro: las mismas cartas del archivo, sin las de «momento» (tienen su sitio aparte).
+    var lg = $('[data-lia-grid]');
+    if (lg.children.length === 0) {
+      $$('[data-grid] .card').forEach(function (c) {
+        if (c.dataset.lock === 'momento') return;
+        lg.appendChild(c.cloneNode(true));
+      });
+    }
+    function show() {
+      gate.hidden = false; gate.classList.remove('is-open', 'is-leaving'); home.hidden = true;
+      lia.hidden = false; lia.scrollTop = 0; document.documentElement.style.overflow = 'hidden';
+    }
+    function hide() { lia.hidden = true; document.documentElement.style.overflow = ''; }
+    document.addEventListener('click', function (e) {
+      if (e.target.closest('[data-lia-open]')) { e.preventDefault(); show(); }
+      if (e.target.closest('[data-lia-exit]')) hide();
+      if (e.target.closest('[data-lia-book]')) toast('En la web real: se descarga el PDF con todas tus cartas');
+    });
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      gate.classList.add('is-open');
+      setTimeout(function () { gate.classList.add('is-leaving'); }, 1700);
+      setTimeout(function () { gate.hidden = true; home.hidden = false; lia.scrollTop = 0; }, 2400);
+    });
+    $('[data-lia-who]').addEventListener('click', function (e) {
+      var b = e.target.closest('.chip'); if (!b) return;
+      $$('.chip', e.currentTarget).forEach(function (x) { x.classList.toggle('is-on', x === b); });
+      $$('.card', lg).forEach(function (c) { c.hidden = !(b.dataset.v === '*' || c.dataset.de === b.dataset.v); });
+    });
+    if (location.hash === '#vista-lia') show();
   }
 
   /* ---------- Familia ---------- */
@@ -379,6 +451,7 @@
     safe(initThemes, 'themes');
     safe(initLetters, 'letters');
     safe(initFamily, 'family');
+    safe(initLia, 'lia');
 
     window.addEventListener('resize', function () { vh = window.innerHeight; vw = window.innerWidth; });
     (function loop() {
