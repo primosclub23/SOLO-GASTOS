@@ -9,6 +9,7 @@
   var ease = function (t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
   function safe(fn, name) { try { fn(); } catch (e) { if (window.console) console.warn('[buzon] ' + name, e); } }
 
+  var api = window.__BUZON__ = {};
   var vh = window.innerHeight, vw = window.innerWidth;
   var frameFns = [];
 
@@ -177,14 +178,15 @@
   /* ---------- Editor ---------- */
   function initEditor() {
     // Cuenta atrás hasta las 23:59
-    var cd = $('[data-countdown]');
+    var cds = $$('[data-countdown]');
+    var cd = { set textContent(v) { cds.forEach(function (c) { c.textContent = v; }); } };
     function tick() {
       var now = new Date(), end = new Date(now); end.setHours(23, 59, 59, 0);
       var s = Math.max(0, Math.floor((end - now) / 1000));
       var pad = function (n) { return (n < 10 ? '0' : '') + n; };
       cd.textContent = pad(Math.floor(s / 3600)) + ' h ' + pad(Math.floor(s % 3600 / 60)) + ' min ' + pad(s % 60) + ' s';
     }
-    if (cd) { tick(); setInterval(tick, 1000); }
+    if (cds.length) { tick(); setInterval(tick, 1000); }
 
     // Selección única (tema, candado)
     $$('[data-single]').forEach(function (group) {
@@ -228,9 +230,8 @@
     var btn = $('[data-send-btn]'), ov = $('[data-sending]'), wrap = $('[data-sending-wrap]'), src = $('[data-send]');
     if (!btn || !ov || !src) return;
     var busy = false;
-    btn.addEventListener('click', function () {
+    function playSend(text, done) {
       if (busy) return; busy = true;
-      var text = ($('[data-edit]').textContent || '').trim();
       wrap.innerHTML = '';
       var stage = src.cloneNode(true);
       stage.removeAttribute('data-send');
@@ -249,10 +250,15 @@
         if (p < 1) return requestAnimationFrame(step);
         setTimeout(function () {
           ov.classList.add('is-out');
-          setTimeout(function () { ov.hidden = true; busy = false; addSentCard(text); toast('Tu carta ya está en el buzón de Lia'); }, 600);
+          setTimeout(function () { ov.hidden = true; busy = false; if (done) done(); }, 600);
         }, 900);
       }
       requestAnimationFrame(step);
+    }
+    api.playSend = playSend;
+    btn.addEventListener('click', function () {
+      var text = ($('[data-edit]').textContent || '').trim();
+      playSend(text, function () { addSentCard(text); toast('Tu carta ya está en el buzón de Lia'); });
     });
   }
   function addSentCard(text) {
@@ -344,7 +350,7 @@
       } else showLetter(card);
       modal.hidden = false; document.documentElement.style.overflow = 'hidden';
     }
-    function close() { modal.hidden = true; document.documentElement.style.overflow = $('[data-lia]').hidden ? '' : 'hidden'; current = null; }
+    function close() { modal.hidden = true; document.documentElement.style.overflow = ($('[data-lia]').hidden && $('[data-app]').hidden) ? '' : 'hidden'; current = null; }
 
     document.addEventListener('click', function (e) { var c = e.target.closest('.card'); if (c) open(c); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('card')) open(e.target); });
@@ -437,6 +443,8 @@
       toast('Aprobada · la carta de la abuela va camino del buzón');
     });
   }
+
+  api.$ = $; api.$$ = $$; api.clamp = clamp; api.toast = toast; api.addSentCard = addSentCard;
 
   /* ---------- Arranque ---------- */
   function boot() {

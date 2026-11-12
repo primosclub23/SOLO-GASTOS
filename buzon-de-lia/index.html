@@ -9,7 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261112b">
+  <link rel="stylesheet" href="styles.css?v=20261112c">
+  <link rel="stylesheet" href="app.css?v=20261112c">
 </head>
 <body>
 
@@ -29,7 +30,7 @@
       <span class="nav-name">El buzón de Lia</span>
     </a>
     <nav class="nav-links">
-      <a href="#escribir">Escribir</a>
+      <a href="#tu-lado" data-app-open>Tu lado</a>
       <a href="#cartas">Las cartas</a>
       <a href="#vista-lia" data-lia-open>Vista de Lia</a>
       <a href="#familia">La familia</a>
@@ -156,6 +157,7 @@
         <p class="label section-label">Tu parte · privada</p>
         <h2 class="title-lg">La carta de hoy sigue <em>abierta</em></h2>
         <p class="body">Entras, escribes y eliges el tema. La fecha se pone sola. Puedes volver durante el día y añadir lo que se te ocurra: a medianoche se sella.</p>
+        <button class="btn-solid lia-open-btn" type="button" data-app-open>Ver tu lado en el móvil →</button>
       </div>
 
       <div class="editor reveal">
@@ -416,6 +418,220 @@
     <span>Hecho con calma, para que dure</span>
   </footer>
 
+  <!-- TU LADO: la app en el móvil -->
+  <div class="app" data-app hidden>
+    <aside class="app-side">
+      <p class="label section-label">Tu lado · en el móvil</p>
+      <h2 class="title-lg">Así escribes <em>cada día</em></h2>
+      <p class="body">Entras con tu contraseña, sigues la carta de hoy y a medianoche se sella sola. Toca dentro del teléfono o salta a una pantalla:</p>
+      <div class="app-jump">
+        <button class="chip" type="button" data-go="login">01 · Entrar</button>
+        <button class="chip" type="button" data-go="home">02 · Inicio</button>
+        <button class="chip" type="button" data-go="write">03 · Escribir</button>
+        <button class="chip" type="button" data-seal-demo>04 · El sellado de las 23:59</button>
+        <button class="chip" type="button" data-go="plan">05 · Cartas programadas</button>
+      </div>
+      <button class="btn-ghost" type="button" data-app-exit>← Volver a la maqueta</button>
+    </aside>
+
+    <div class="phone">
+      <button class="phone-exit" type="button" data-app-exit aria-label="Salir">×</button>
+      <div class="phone-screen" data-phone>
+
+        <!-- 01 · Entrar -->
+        <section class="scr scr-login" data-scr="login">
+          <div class="splash-seal login-seal"><span>L</span></div>
+          <p class="label">El buzón de Lia</p>
+          <h3 class="title-lg">Hola otra <em>vez</em></h3>
+          <p class="hand">Hoy también hay algo que contarle.</p>
+          <form class="login-form" data-login>
+            <input class="field" type="password" placeholder="Tu contraseña" aria-label="Tu contraseña" autocomplete="off">
+            <button class="btn-solid btn-wide" type="submit">Entrar</button>
+          </form>
+          <p class="label login-note">Solo tú escribes aquí</p>
+        </section>
+
+        <!-- 02 · Inicio -->
+        <section class="scr" data-scr="home" hidden>
+          <p class="label">Jueves · 12 de noviembre</p>
+          <h3 class="title-lg scr-title"><span data-greet>Buenas noches</span></h3>
+          <p class="hand scr-hand">Hoy todavía puedes contarle algo.</p>
+
+          <div class="today" data-today>
+            <div class="today-top"><span class="label">La carta de hoy · <b data-today-state>abierta</b></span><span class="seal-timer"><i></i><b data-countdown>— h — min</b></span></div>
+            <p class="hand" data-today-ex>Te he visto desayunar medio dormida y he pensado que ojalá recuerdes esto…</p>
+            <button class="btn-solid btn-wide" type="button" data-go="write">Seguir escribiendo</button>
+            <button class="linkish" type="button" data-seal-demo>Ver cómo se sella a las 23:59 →</button>
+          </div>
+
+          <p class="label scr-sub">Pendiente de tu visto bueno</p>
+          <div class="acard" data-pend>
+            <span class="av">A</span>
+            <div><b>La abuela</b><span class="hand">«Lia, cuando tu madre tenía tu edad…»</span></div>
+            <button class="btn-ghost" type="button" data-pend-ok>Aprobar</button>
+          </div>
+
+          <p class="label scr-sub">Próximas entregas</p>
+          <div class="acard acard-row" data-go="plan" role="button" tabindex="0">
+            <span class="ministamp">10</span>
+            <div><b>Cuando cumpla 10</b><span class="label">Le llega sola ese día</span></div><span class="chev">→</span>
+          </div>
+          <div class="acard acard-row" data-go="plan" role="button" tabindex="0">
+            <span class="ministamp">18</span>
+            <div><b>Cuando cumpla 18</b><span class="label">Le llega sola ese día</span></div><span class="chev">→</span>
+          </div>
+
+          <div class="mini-stats">
+            <div><span class="num">8</span><span class="label">cartas</span></div>
+            <div><span class="num">12</span><span class="label">fotos</span></div>
+            <div><span class="num">3</span><span class="label">audios</span></div>
+          </div>
+        </section>
+
+        <!-- 03 · Escribir -->
+        <section class="scr scr-write" data-scr="write" hidden>
+          <div class="w-top">
+            <button class="w-back" type="button" data-go="home" aria-label="Volver">←</button>
+            <span class="label" data-w-who>Jue 12 nov</span>
+            <button class="seal-timer" type="button" data-seal-demo><i></i><b data-countdown>— h — min</b></button>
+          </div>
+          <div class="w-paper">
+            <p class="hand w-hi">Querida Lia:</p>
+            <div class="part">
+              <span class="part-time">Por la mañana · 08:14</span>
+              <p class="hand">Te he visto desayunar medio dormida y he pensado que ojalá recuerdes esto: las mañanas lentas también cuentan.</p>
+            </div>
+            <div class="part part-now">
+              <span class="part-time">Esta noche · ahora</span>
+              <div class="hand part-edit" contenteditable="true" spellcheck="false" data-w-edit aria-label="Escribe aquí">Lo que te quería decir hoy es que equivocarse no es lo contrario de hacerlo bien. Es el camino.</div>
+            </div>
+            <div class="w-items" data-w-items></div>
+            <p class="w-meta label"><span data-w-tema>Lo que he aprendido</span> · <span data-w-lock>Sin candado</span></p>
+          </div>
+          <div class="w-bar">
+            <button type="button" data-sheet-open="foto" aria-label="Foto"><svg viewBox="0 0 24 24"><rect x="3.5" y="6.5" width="17" height="12" rx="2"/><circle cx="12" cy="12.5" r="3.2"/><path d="M8.5 6.5 10 4.5h4l1.5 2"/></svg></button>
+            <button type="button" data-sheet-open="audio" aria-label="Audio"><svg viewBox="0 0 24 24"><rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg></button>
+            <button type="button" data-sheet-open="tema" aria-label="Tema"><svg viewBox="0 0 24 24"><path d="M4 4.5h7l9 9-7 7-9-9z"/><circle cx="8.3" cy="8.8" r="1.2"/></svg></button>
+            <button type="button" data-sheet-open="candado" aria-label="Candado"><svg viewBox="0 0 24 24"><rect x="6" y="10.5" width="12" height="9" rx="1.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg></button>
+            <button class="btn-solid" type="button" data-w-send><svg viewBox="0 0 24 24"><path d="M3.5 6.5h17v11h-17z"/><path d="m3.5 6.5 8.5 7 8.5-7"/></svg><span data-w-send-txt>Enviar</span></button>
+          </div>
+        </section>
+
+        <!-- 05 · Programadas -->
+        <section class="scr" data-scr="plan" hidden>
+          <p class="label">Programadas</p>
+          <h3 class="title-lg scr-title">Cartas que siguen <em>llegando</em></h3>
+          <p class="body">Las escribes ahora y eliges cuándo le llegan. El buzón las entrega ese día, estés o no estés.</p>
+
+          <p class="label scr-sub">Una por cada cumpleaños</p>
+          <div class="ages" data-ages><button class="age" type="button" data-age="8"><b>8</b><span>Vacía</span></button><button class="age" type="button" data-age="9"><b>9</b><span>Vacía</span></button><button class="age is-done" type="button" data-age="10"><b>10</b><span>Escrita</span></button><button class="age" type="button" data-age="11"><b>11</b><span>Vacía</span></button><button class="age" type="button" data-age="12"><b>12</b><span>Vacía</span></button><button class="age" type="button" data-age="13"><b>13</b><span>Vacía</span></button><button class="age" type="button" data-age="14"><b>14</b><span>Vacía</span></button><button class="age is-done" type="button" data-age="15"><b>15</b><span>Escrita</span></button><button class="age" type="button" data-age="16"><b>16</b><span>Vacía</span></button><button class="age" type="button" data-age="17"><b>17</b><span>Vacía</span></button><button class="age is-done" type="button" data-age="18"><b>18</b><span>Escrita</span></button><button class="age" type="button" data-age="21"><b>21</b><span>Vacía</span></button><button class="age" type="button" data-age="25"><b>25</b><span>Vacía</span></button><button class="age" type="button" data-age="30"><b>30</b><span>Vacía</span></button><button class="age" type="button" data-age="40"><b>40</b><span>Vacía</span></button></div>
+
+          <p class="label scr-sub">Otros días</p>
+          <div class="acard acard-row"><span class="ministamp">✦</span><div><b>El día de su boda</b><span class="label">La entrega tu persona de confianza</span></div></div>
+          <div class="acard acard-row"><span class="ministamp">✦</span><div><b>Cuando tenga su primer hijo</b><span class="label">La entrega tu persona de confianza</span></div></div>
+          <div class="acard acard-row acard-add" data-plan-new role="button" tabindex="0"><span class="ministamp">+</span><div><b>Otra fecha u otro día</b><span class="label">Escribir una carta para más adelante</span></div></div>
+
+          <div class="plan-note">
+            <p class="label">Si un día no estás</p>
+            <p class="hand">Las que tienen fecha se entregan solas. Las demás las entrega quien tú hayas elegido.</p>
+          </div>
+        </section>
+
+        <!-- Barra inferior -->
+        <nav class="tabbar" data-tabbar hidden>
+          <button type="button" data-go="home" data-tab="home"><svg viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5h-5v5H5a1 1 0 0 1-1-1z"/></svg><span>Inicio</span></button>
+          <button type="button" class="tab-main" data-go="write" data-tab="write"><svg viewBox="0 0 24 24"><path d="M4 20l1-4.5L16.5 4a2.1 2.1 0 0 1 3 3L8 18.5z"/><path d="M14.5 6l3 3"/></svg></button>
+          <button type="button" data-go="plan" data-tab="plan"><svg viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></svg><span>Programadas</span></button>
+        </nav>
+
+        <!-- Hojas inferiores -->
+        <div class="sheet" data-sheet hidden>
+          <div class="sheet-bg" data-sheet-close></div>
+          <div class="sheet-box">
+            <i class="sheet-grip"></i>
+
+            <div data-panel="foto" hidden>
+              <h4 class="title-sm">Añadir una <em>foto</em></h4>
+              <div class="foto-prev" data-foto-prev><figure class="polaroid polaroid-s"><div class="ph ph-field" data-foto-ph></div><figcaption data-foto-cap>escribe la frase</figcaption></figure></div>
+              <label class="btn-ghost btn-wide">Elegir una foto del móvil<input type="file" accept="image/*" data-foto-file hidden></label>
+              <input class="field field-hand" type="text" maxlength="40" placeholder="La frase de debajo, a mano" data-foto-text>
+              <button class="btn-solid btn-wide" type="button" data-foto-add>Pegarla en la carta</button>
+            </div>
+
+            <div data-panel="audio" hidden>
+              <h4 class="title-sm">Grabar tu <em>voz</em></h4>
+              <p class="rec-time" data-rec-time>0:00</p>
+              <div class="audio-bars rec-bars" data-rec-bars></div>
+              <button class="rec-btn" type="button" data-rec aria-label="Grabar"><i></i></button>
+              <p class="label" data-rec-hint>Toca para grabar</p>
+              <button class="btn-solid btn-wide" type="button" data-rec-add disabled>Añadirlo a la carta</button>
+            </div>
+
+            <div data-panel="tema" hidden>
+              <h4 class="title-sm">¿De qué le <em>hablas</em>?</h4>
+              <div class="chips" data-w-temas>
+                <button class="chip" type="button">Quién soy</button>
+                <button class="chip is-on" type="button">Lo que he aprendido</button>
+                <button class="chip" type="button">Mis frases</button>
+                <button class="chip" type="button">Mi opinión sobre…</button>
+                <button class="chip" type="button">Para cuando cumplas…</button>
+                <button class="chip" type="button">Para los días malos</button>
+              </div>
+            </div>
+
+            <div data-panel="candado" hidden>
+              <h4 class="title-sm">¿Cuándo puede <em>leerla</em>?</h4>
+              <div class="locks" data-w-locks>
+                <button class="lock is-on" type="button" data-lk="none"><b>Sin candado</b><span>La lee cuando quiera</span></button>
+                <button class="lock" type="button" data-lk="fecha"><b>Cerrada hasta una fecha</b><span>La ve en su buzón, pero no se abre</span></button>
+                <button class="lock" type="button" data-lk="momento"><b>Para un momento</b><span>La abre ella cuando lo necesite</span></button>
+                <button class="lock" type="button" data-lk="plan"><b>Que le llegue más adelante</b><span>No la ve hasta ese día</span></button>
+              </div>
+              <div class="lk-extra" data-lk-extra="fecha" hidden>
+                <div class="chips" data-lk-pre><button class="chip" type="button">Cuando cumpla 18</button><button class="chip" type="button">Cuando cumpla 30</button></div>
+                <input class="field" type="date" data-lk-date aria-label="Fecha">
+              </div>
+              <div class="lk-extra" data-lk-extra="momento" hidden>
+                <div class="chips" data-lk-pre><button class="chip" type="button">Cuando estés triste</button><button class="chip" type="button">Cuando me eches de menos</button><button class="chip" type="button">Cuando tengas miedo</button></div>
+                <input class="field field-hand" type="text" maxlength="40" placeholder="O escríbelo tú: «Cuando…»" data-lk-text>
+              </div>
+              <div class="lk-extra" data-lk-extra="plan" hidden>
+                <div class="chips" data-lk-pre><button class="chip" type="button">Su próximo cumpleaños</button><button class="chip" type="button">Cuando cumpla 18</button><button class="chip" type="button">Una cada cumpleaños</button></div>
+                <input class="field" type="date" data-lk-date aria-label="Fecha de entrega">
+              </div>
+              <button class="btn-solid btn-wide" type="button" data-sheet-close>Listo</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 04 · El sellado de las 23:59 -->
+        <div class="mid" data-mid hidden>
+          <p class="label">Jueves · 12 de noviembre</p>
+          <p class="mid-clock" data-mid-clock>23:59:57</p>
+          <div class="mid-paper">
+            <p class="hand">Querida Lia:</p>
+            <p class="hand" data-mid-text>Lo que te quería decir hoy es que equivocarse no es lo contrario de hacerlo bien. Es el camino.</p>
+            <i class="mid-caret"></i>
+            <i class="mid-drop"></i>
+            <i class="mid-ring"></i>
+            <div class="env-seal mid-wax"><span>L</span></div>
+            <div class="mid-post">
+              <svg viewBox="0 0 200 200"><defs><path id="midp" d="M100,100 m-74,0 a74,74 0 1,1 148,0 a74,74 0 1,1 -148,0"/></defs>
+                <circle cx="100" cy="100" r="94" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="100" cy="100" r="58" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                <text><textPath href="#midp">SELLADA · EL BUZÓN DE LIA · PARA SIEMPRE · </textPath></text>
+                <text x="100" y="96" text-anchor="middle" class="mid-post-d">12 NOV</text><text x="100" y="116" text-anchor="middle" class="mid-post-y">2026</text>
+              </svg>
+            </div>
+          </div>
+          <p class="hand mid-cap">Sellada. Ya es suya.</p>
+          <p class="label mid-sub">Ya no se puede cambiar. Mañana, una hoja nueva.</p>
+          <button class="btn-solid" type="button" data-mid-close>Buenas noches</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <!-- VISTA DE LIA: su entrada y su buzón -->
   <div class="lia" data-lia hidden>
     <div class="lia-bar">
@@ -555,6 +771,7 @@
   <div class="sending" data-sending hidden aria-hidden="true"><div class="send-wrap" data-sending-wrap></div></div>
   <div class="toast" data-toast role="status" hidden></div>
 
-  <script defer src="main.js?v=20261112b"></script>
+  <script defer src="main.js?v=20261112c"></script>
+  <script defer src="app.js?v=20261112c"></script>
 </body>
 </html>
