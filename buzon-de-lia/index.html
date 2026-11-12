@@ -9,8 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261112c">
-  <link rel="stylesheet" href="app.css?v=20261112c">
+  <link rel="stylesheet" href="styles.css?v=20261112d">
+  <link rel="stylesheet" href="app.css?v=20261112d">
+  <link rel="stylesheet" href="extras.css?v=20261112d">
 </head>
 <body>
 
@@ -34,7 +35,7 @@
       <a href="#cartas">Las cartas</a>
       <a href="#vista-lia" data-lia-open>Vista de Lia</a>
       <a href="#familia">La familia</a>
-      <a href="#siempre">Para siempre</a>
+      <a href="#papel">En papel</a>
     </nav>
     <a class="btn-solid nav-cta" href="#escribir">Escribir hoy</a>
   </header>
@@ -361,6 +362,50 @@
       <p class="grid-empty label" hidden>Todavía no hay cartas aquí. Ya llegarán.</p>
     </section>
 
+    <!-- 7b · EN PAPEL -->
+    <section class="section papel" id="papel" data-px-root>
+      <div class="section-head reveal">
+        <p class="label section-label">En papel</p>
+        <h2 class="title-lg">Lo que al final tendrá <em>en las manos</em></h2>
+        <p class="body">Cada carta se imprime con tu letra y sus polaroids. Y todas juntas forman un libro, año a año.</p>
+      </div>
+      <div class="papel-wrap">
+        <div class="px" data-speed="-0.07" style="--r:-2.5deg">
+          <article class="a5">
+            <p class="label a5-head"><span>12 de noviembre de 2026</span><span>Lo que he aprendido</span></p>
+            <p class="hand a5-hi">Querida Lia:</p>
+            <figure class="polaroid polaroid-s a5-pol"><div class="ph ph-cake"></div><figcaption>hoy, 08:20</figcaption></figure>
+            <p class="hand">Hoy he pensado en ti toda la mañana. Quería contarte una cosa que tardé muchos años en entender: equivocarse no es lo contrario de hacerlo bien. Es el camino.</p>
+            <p class="hand">Las cosas que mejor me han salido en la vida empezaron saliendo mal. Así que cuando falles, y fallarás, no te escondas.</p>
+            <p class="hand a5-sign">Quien más te quiere</p>
+            <p class="label a5-foot">— 14 —</p>
+          </article>
+        </div>
+        <div class="book-col">
+          <div class="book" data-book>
+            <div class="book-page">
+              <p class="label">Tomo I · 2026</p>
+              <p class="hand">Para Lia.<br>Todo lo que quise decirte, por si un día te hace falta.</p>
+              <p class="label">8 cartas · 12 fotos</p>
+            </div>
+            <div class="book-cover">
+              <div class="book-front"><span class="book-orn">✦</span><span class="book-title">Cartas<br>para <em>Lia</em></span><span class="book-year">2026 —</span></div>
+              <div class="book-inside"></div>
+            </div>
+          </div>
+          <p class="hand book-note">se abre al bajar ↑</p>
+        </div>
+        <div class="tuletra reveal">
+          <span class="step-badge">Tu letra</span>
+          <h3 class="title-sm">Pruébalo con tu <em>letra de verdad</em></h3>
+          <p class="body">Cuando tengas la fuente de Calligraphr, cárgala aquí y toda la maqueta pasa a estar escrita con ella. No sale de tu dispositivo.</p>
+          <label class="btn-solid">Cargar mi fuente (.ttf / .otf)<input type="file" accept=".ttf,.otf,.woff,.woff2" data-font-file hidden></label>
+          <button class="btn-ghost" type="button" data-font-reset hidden>Volver a la letra de ejemplo</button>
+          <p class="hand tuletra-demo">Así se verá cada carta que le escribas.</p>
+        </div>
+      </div>
+    </section>
+
     <!-- 8 · FAMILIA -->
     <section class="section family" id="familia" data-px-root>
       <div class="family-copy reveal">
@@ -371,6 +416,7 @@
           <span class="invite-mail">abuelo@correo.com</span>
           <button class="btn-solid" type="button">Invitar</button>
         </div>
+        <button class="linkish fam-link" type="button" data-app-open="invite">Ver lo que recibe la abuela →</button>
       </div>
 
       <div class="family-panel reveal">
@@ -430,6 +476,7 @@
         <button class="chip" type="button" data-go="write">03 · Escribir</button>
         <button class="chip" type="button" data-seal-demo>04 · El sellado de las 23:59</button>
         <button class="chip" type="button" data-go="plan">05 · Cartas programadas</button>
+        <button class="chip" type="button" data-go="invite">06 · La invitación de la abuela</button>
       </div>
       <button class="btn-ghost" type="button" data-app-exit>← Volver a la maqueta</button>
     </aside>
@@ -535,6 +582,24 @@
             <p class="label">Si un día no estás</p>
             <p class="hand">Las que tienen fecha se entregan solas. Las demás las entrega quien tú hayas elegido.</p>
           </div>
+        </section>
+
+        <!-- 06 · La invitación (lo que ve la abuela) -->
+        <section class="scr scr-inv" data-scr="invite" hidden>
+          <p class="label">Lo que recibe la abuela</p>
+          <div class="mailcard">
+            <p class="label mail-meta">De: El buzón de Lia<br>Para: abuela@correo.com</p>
+            <div class="splash-seal mail-seal"><span>L</span></div>
+            <h3 class="title-lg">Te invitan a escribirle a <em>Lia</em></h3>
+            <p class="hand">«Quiero que Lia tenga también tus cartas. Escríbele cuando quieras.»</p>
+            <ul class="mail-list">
+              <li>Tus cartas irán firmadas <b>«De la abuela»</b>.</li>
+              <li>Antes de llegarle, cada carta pasa por un visto bueno.</li>
+              <li>Puedes añadir fotos y grabar tu voz.</li>
+            </ul>
+            <button class="btn-solid btn-wide" type="button" data-inv-ok>Aceptar y escribir</button>
+          </div>
+          <p class="label inv-note">Sin contraseñas difíciles: entra desde el enlace de su correo</p>
         </section>
 
         <!-- Barra inferior -->
@@ -665,10 +730,18 @@
 
     <!-- Su buzón por dentro -->
     <div class="lhome" data-lia-home hidden>
+      <div class="lwhen">
+        <span class="label">Ver su buzón</span>
+        <div class="chips" data-lia-when>
+          <button class="chip is-on" type="button" data-v="hoy">Hoy</button>
+          <button class="chip" type="button" data-v="18">El día que cumple 18</button>
+          <button class="chip" type="button" data-v="lejos">Muchos años después</button>
+        </div>
+      </div>
       <header class="lhome-head">
-        <p class="label section-label">Jueves · 12 de noviembre de 2026</p>
-        <h2 class="title-xl">Buenos días, <em>Lia</em></h2>
-        <p class="hand lhome-hand">Hoy te ha llegado una carta nueva.</p>
+        <p class="label section-label" data-lw-date>Jueves · 12 de noviembre de 2026</p>
+        <h2 class="title-xl" data-lw-title>Buenos días, <em>Lia</em></h2>
+        <p class="hand lhome-hand" data-lw-hand>Hoy te ha llegado una carta nueva.</p>
       </header>
 
       <section class="lnew">
@@ -770,8 +843,10 @@
   <!-- Overlay de envío -->
   <div class="sending" data-sending hidden aria-hidden="true"><div class="send-wrap" data-sending-wrap></div></div>
   <div class="toast" data-toast role="status" hidden></div>
+  <button class="snd" type="button" data-snd aria-label="Sonido" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path class="snd-on" d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.6 7.6 0 0 1 0 11"/><path class="snd-off" d="m15.5 9.5 5 5m0-5-5 5"/></svg></button>
 
-  <script defer src="main.js?v=20261112c"></script>
-  <script defer src="app.js?v=20261112c"></script>
+  <script defer src="main.js?v=20261112d"></script>
+  <script defer src="app.js?v=20261112d"></script>
+  <script defer src="extras.js?v=20261112d"></script>
 </body>
 </html>

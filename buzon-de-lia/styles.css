@@ -246,7 +246,7 @@ em { font-style: italic; font-weight: 400; color: var(--accent); }
 .num { font-family: var(--serif); font-style: italic; font-size: clamp(38px, 5vw, 68px); line-height: 1; color: var(--accent); }
 
 /* ---------- 3 · Envío con scroll ---------- */
-.sendsec { height: 460vh; position: relative; background: linear-gradient(180deg, var(--bg), var(--surface) 12%, var(--surface) 88%, var(--bg)); }
+.sendsec { height: 340vh; position: relative; background: linear-gradient(180deg, var(--bg), var(--surface) 12%, var(--surface) 88%, var(--bg)); }
 .sendsec-sticky {
   position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden;
   display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 40px;
@@ -388,7 +388,7 @@ em { font-style: italic; font-weight: 400; color: var(--accent); }
 .p4 { bottom: 0; left: 0; } .p5 { bottom: 6%; right: 8%; }
 
 /* ---------- 6 · Temas ---------- */
-.themes { height: 420vh; position: relative; }
+.themes { height: 300vh; position: relative; }
 .themes-sticky { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; display: flex; flex-direction: column; justify-content: center; gap: clamp(24px, 5vh, 56px); padding-top: 70px; }
 .themes-head { padding: 0 max(40px, calc((100vw - 1120px) / 2)); }
 .themes-track { display: flex; gap: 22px; padding: 20px max(40px, calc((100vw - 1120px) / 2)); width: max-content; will-change: transform; }

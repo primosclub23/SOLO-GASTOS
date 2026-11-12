@@ -14,12 +14,19 @@
   /* ---------- Navegación entre pantallas ---------- */
   function go(name) {
     state.scr = name;
+    if (name === 'home' || name === 'login' || name === 'plan') setAs(null);
     $$('[data-scr]', phone).forEach(function (s) { s.hidden = s.dataset.scr !== name; });
     tabbar.hidden = name === 'login' || name === 'write' || name === 'invite';
     $$('[data-tab]', tabbar).forEach(function (t) { t.classList.toggle('is-on', t.dataset.tab === name); });
     $$('.app-jump [data-go]', app).forEach(function (c) { c.classList.toggle('is-on', c.dataset.go === name); });
     closeSheet();
     var s = $('[data-scr="' + name + '"]', phone); if (s) s.scrollTop = 0;
+  }
+  function setAs(who) {
+    state.as = who;
+    $('[data-w-who]', app).textContent = who ? 'Escribes como: ' + who : 'Jue 12 nov';
+    $('[data-w-send-txt]', app).textContent = who ? 'Enviar a aprobar' : 'Enviar';
+    $('.scr-write .w-back', app).dataset.go = who ? 'invite' : 'home';
   }
   function show(start) {
     app.hidden = false; document.documentElement.style.overflow = 'hidden';
@@ -43,6 +50,10 @@
       var c = e.target.closest('[data-pend]'); c.classList.add('is-gone');
       setTimeout(function () { c.hidden = true; }, 700);
       toast('Aprobada · va camino del buzón');
+    });
+    $('[data-inv-ok]', app).addEventListener('click', function () {
+      go('write'); setAs('la abuela');
+      $('[data-w-edit]', app).textContent = 'Mi niña, cuando tu madre tenía tu edad…';
     });
     if (location.hash === '#tu-lado') show();
   }

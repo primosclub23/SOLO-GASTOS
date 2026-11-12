@@ -151,6 +151,7 @@
     o.done.style.opacity = g;
     o.done.style.transform = 'translateY(' + ((1 - g) * 8) + 'px)';
     o.stage.style.setProperty('--sy', ((1 - m) * 120) + 'px');
+    if (api.cue) api.cue(o, p);
   }
 
   function initSendScroll() {
@@ -444,6 +445,7 @@
     });
   }
 
+  api.onFrame = function (fn) { frameFns.push(fn); };
   api.$ = $; api.$$ = $$; api.clamp = clamp; api.toast = toast; api.addSentCard = addSentCard;
 
   /* ---------- Arranque ---------- */
