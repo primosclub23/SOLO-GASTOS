@@ -9,10 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261112f">
-  <link rel="stylesheet" href="app.css?v=20261112f">
-  <link rel="stylesheet" href="extras.css?v=20261112f">
-  <link rel="stylesheet" href="hero.css?v=20261112f">
+  <link rel="stylesheet" href="styles.css?v=20261112e">
+  <link rel="stylesheet" href="app.css?v=20261112e">
+  <link rel="stylesheet" href="extras.css?v=20261112e">
 </head>
 <body>
 
@@ -43,84 +42,54 @@
 
   <main>
 
-    <!-- 1 · HERO: el buzón -->
-    <section class="heroX" id="inicio">
-      <div class="hero heroX-pin">
-        <div class="hero-float" aria-hidden="true">
-          <div class="px f-ring" data-speed="-0.10" data-depth="14">
-            <svg viewBox="0 0 200 200" class="ring">
-              <defs><path id="ringp" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs>
-              <circle cx="100" cy="100" r="96" fill="none" stroke="currentColor" stroke-width=".6"/>
-              <circle cx="100" cy="100" r="62" fill="none" stroke="currentColor" stroke-width=".6"/>
-              <text><textPath href="#ringp">PARA LIA · CON TODO MI AMOR · PARA SIEMPRE · </textPath></text>
-              <path d="M70 100h60M70 92h60M70 108h60" stroke="currentColor" stroke-width=".6"/>
-            </svg>
-          </div>
-          <div class="px f-env f-env-a" data-speed="-0.22" data-depth="30" style="--r:-13deg"><div class="envm"><i class="envm-seal"></i></div></div>
-          <div class="px f-pol" data-speed="-0.34" data-depth="38" style="--r:7deg"><figure class="polaroid polaroid-s"><div class="ph ph-sea"></div><figcaption>el primer mar</figcaption></figure></div>
-          <div class="px f-stamp" data-speed="-0.42" data-depth="46" style="--r:-6deg"><div class="stamp"><b>L</b><small>Para siempre</small></div></div>
+    <!-- 1 · HERO -->
+    <section class="hero" id="inicio" data-px-root>
+      <div class="hero-float" aria-hidden="true">
+        <div class="px f-ring" data-speed="-0.18" data-depth="14">
+          <svg viewBox="0 0 200 200" class="ring">
+            <defs><path id="ringp" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs>
+            <circle cx="100" cy="100" r="96" fill="none" stroke="currentColor" stroke-width=".6"/>
+            <circle cx="100" cy="100" r="62" fill="none" stroke="currentColor" stroke-width=".6"/>
+            <text><textPath href="#ringp">PARA LIA · CON TODO MI AMOR · PARA SIEMPRE · </textPath></text>
+            <path d="M70 100h60M70 92h60M70 108h60" stroke="currentColor" stroke-width=".6"/>
+          </svg>
         </div>
-
-        <div class="hero-head" data-hero-head>
-          <div class="badge"><span class="badge-dot"></span>Privado · solo para ella</div>
-          <h1 class="hero-title">
-            <span class="w" style="--i:0">El</span>
-            <span class="w" style="--i:1">buzón</span>
-            <span class="w" style="--i:2">de</span>
-            <em class="w" style="--i:3">Lia</em>
-          </h1>
+        <div class="px f-env f-env-a" data-speed="-0.32" data-depth="30" style="--r:-13deg">
+          <div class="envm"><i class="envm-seal"></i></div>
         </div>
-
-        <!-- El buzón en 3D -->
-        <div class="mb-scene" aria-hidden="true">
-          <div class="mb" data-mb>
-            <div class="mb-post"></div><div class="mb-post mb-post2"></div>
-            <div class="mb-plank"></div>
-            <div class="mb-floor"></div>
-            <div class="mb-wall mb-wall-b"></div>
-            <div class="mb-cap mb-back"></div>
-            <i class="mb-strip" style="transform:rotateX(9deg) translateZ(100px);background:hsl(22,47%,37.1%)"></i><i class="mb-strip" style="transform:rotateX(27deg) translateZ(100px);background:hsl(22,47%,41.2%)"></i><i class="mb-strip" style="transform:rotateX(45deg) translateZ(100px);background:hsl(22,47%,46.1%)"></i><i class="mb-strip" style="transform:rotateX(63deg) translateZ(100px);background:hsl(22,47%,50.3%)"></i><i class="mb-strip" style="transform:rotateX(81deg) translateZ(100px);background:hsl(22,47%,52.7%)"></i><i class="mb-strip" style="transform:rotateX(99deg) translateZ(100px);background:hsl(22,47%,44.7%)"></i><i class="mb-strip" style="transform:rotateX(117deg) translateZ(100px);background:hsl(22,47%,42.3%)"></i><i class="mb-strip" style="transform:rotateX(135deg) translateZ(100px);background:hsl(22,47%,38.1%)"></i><i class="mb-strip" style="transform:rotateX(153deg) translateZ(100px);background:hsl(22,47%,33.2%)"></i><i class="mb-strip" style="transform:rotateX(171deg) translateZ(100px);background:hsl(22,47%,29.1%)"></i>
-            <div class="mb-cap mb-inside"></div>
-            <div class="mb-env mb-env1"><i class="envm-seal"></i></div>
-            <div class="mb-env mb-env2"><i class="envm-seal"></i></div>
-            <div class="mb-env mb-env3"><i class="envm-seal"></i></div>
-            <div class="mb-wall mb-wall-f" data-mb-wall>
-              <span class="mb-name">Lia</span>
-              <div class="mb-stk" data-stk-area></div>
-            </div>
-            <div class="mb-flag" data-mb-flag><i></i></div>
-            <div class="mb-cap mb-door" data-mb-door><i class="mb-latch"></i><span class="mb-door-ring"></span></div>
-          </div>
+        <div class="px f-env f-env-b" data-speed="-0.12" data-depth="10" style="--r:9deg">
+          <div class="envm envm-s"><i class="envm-seal"></i></div>
         </div>
+        <div class="px f-pol" data-speed="-0.42" data-depth="38" style="--r:7deg">
+          <figure class="polaroid"><div class="ph ph-sea"></div><figcaption>el primer mar</figcaption></figure>
+        </div>
+        <div class="px f-pol2" data-speed="-0.22" data-depth="20" style="--r:-9deg">
+          <figure class="polaroid polaroid-s"><div class="ph ph-field"></div><figcaption>tú, riéndote</figcaption></figure>
+        </div>
+        <div class="px f-stamp" data-speed="-0.5" data-depth="46" style="--r:-6deg">
+          <div class="stamp"><b>L</b><small>Para siempre</small></div>
+        </div>
+        <div class="px f-note" data-speed="-0.28" data-depth="24" style="--r:-3deg">
+          <p class="hand">Para cuando me necesites.</p>
+        </div>
+      </div>
 
-        <div class="hero-core" data-hero-core>
-          <p class="hero-sub">Cartas con mis pensamientos, mis frases y lo que he aprendido de la vida. Para que las tengas siempre. También el día que yo no esté.</p>
+      <div class="hero-core px" data-speed="0.22">
+        <div class="badge"><span class="badge-dot"></span>Privado · solo para ella</div>
+        <h1 class="hero-title">
+          <span class="w" style="--i:0">El</span>
+          <span class="w" style="--i:1">buzón</span>
+          <span class="w" style="--i:2">de</span>
+          <em class="w" style="--i:3">Lia</em>
+        </h1>
+        <p class="hero-sub">Cartas con mis pensamientos, mis frases y lo que he aprendido de la vida. Para que las tengas siempre. También el día que yo no esté.</p>
+        <div class="cta-row">
+          <span class="cta-label">Hoy también hay algo que contarle</span>
           <a class="btn-solid" href="#escribir">Escribir una carta</a>
         </div>
-
-        <!-- Stickers -->
-        <div class="stk-ui" data-stk-ui>
-          <button class="btn-ghost stk-open" type="button" data-stk-open>✦ Decorar el buzón</button>
-          <div class="stk-tray" data-stk-tray hidden>
-            <p class="label">Pega lo que más le gusta · arrastra para colocar</p>
-            <div class="stk-samples" data-stk-samples>
-              <button type="button">⭐</button><button type="button">🌙</button><button type="button">❤️</button><button type="button">🌈</button><button type="button">🦋</button><button type="button">🐱</button><button type="button">🍓</button><button type="button">☀️</button><button type="button">🎈</button><button type="button">🌸</button>
-            </div>
-            <div class="stk-row">
-              <label class="btn-ghost">Subir imágenes<input type="file" accept="image/*" multiple hidden data-stk-file></label>
-              <div class="stk-tools" data-stk-tools hidden>
-                <button type="button" data-stk-do="minus" aria-label="Más pequeño">−</button>
-                <button type="button" data-stk-do="plus" aria-label="Más grande">+</button>
-                <button type="button" data-stk-do="rot" aria-label="Girar">↻</button>
-                <button type="button" data-stk-do="del" aria-label="Quitar">×</button>
-              </div>
-              <button class="btn-solid" type="button" data-stk-done>Listo</button>
-            </div>
-          </div>
-        </div>
-
-        <a class="bottom-label" href="#manifiesto" data-hero-hint>Baja despacio ↓</a>
       </div>
+
+      <a class="bottom-label" href="#manifiesto">Baja despacio ↓</a>
     </section>
 
     <!-- 2 · MANIFIESTO -->
@@ -908,9 +877,8 @@
   <div class="toast" data-toast role="status" hidden></div>
   <button class="snd" type="button" data-snd aria-label="Sonido" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path class="snd-on" d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.6 7.6 0 0 1 0 11"/><path class="snd-off" d="m15.5 9.5 5 5m0-5-5 5"/></svg></button>
 
-  <script defer src="main.js?v=20261112f"></script>
-  <script defer src="app.js?v=20261112f"></script>
-  <script defer src="extras.js?v=20261112f"></script>
-  <script defer src="hero.js?v=20261112f"></script>
+  <script defer src="main.js?v=20261112e"></script>
+  <script defer src="app.js?v=20261112e"></script>
+  <script defer src="extras.js?v=20261112e"></script>
 </body>
 </html>
